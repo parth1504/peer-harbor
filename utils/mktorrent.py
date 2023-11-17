@@ -1,6 +1,36 @@
 import hashlib
 import os
 import bencodepy
+import os
+
+
+import os
+
+def get_size(path):
+    """
+    Get the size of a file or folder.
+
+    Parameters:
+    - path (str): The path to a file or folder.
+
+    Returns:
+    - int: The size in bytes.
+    """
+    if os.path.isfile(path):
+        # If it's a file, return the file size
+        return os.path.getsize(path)
+    elif os.path.isdir(path):
+        # If it's a folder, calculate the total size of all files in the folder and subfolders
+        total_size = 0
+        for dirpath, dirnames, filenames in os.walk(path):
+            for filename in filenames:
+                filepath = os.path.join(dirpath, filename)
+                total_size += os.path.getsize(filepath)
+        return total_size
+    else:
+        # If the path doesn't exist or is neither a file nor a folder
+        raise FileNotFoundError(f"Path '{path}' not found.")
+
 
 def generate_info_dict(path, piece_size):
     if os.path.isfile(path):
@@ -48,20 +78,38 @@ def create_torrent(path, output_torrent_path, announce_url, piece_size=262144):
 
     info_dict['pieces'] = pieces
 
+    info_dict_bencoded = bencodepy.encode(info_dict)
+
+    info_hash= hashlib.sha1(info_dict_bencoded).digest()
+
+    files_info = [
+        {'length':447,'path': 'D:\\backend\p2p\peer-harbor\\utils\\temp.txt'}
+    ]
+
     torrent_data = {
-        'info': info_dict,
-        'announce': announce_url,
-        'creation date': int(os.path.getmtime(path)),
+        
         'created by': 'Your Torrent Creator',
+        'creation date': int(os.path.getmtime(path)),
+        'info':{
+            'files':[{'length':447,'path': 'D:\\backend\p2p\peer-harbor\\utils\\temp.txt'}],
+            'name':'sahil whore',
+            'piece length':piece_size,
+            'pieces':pieces,
+            
+        }
+        
     }
 
     with open(output_torrent_path, 'wb') as torrent_file:
         torrent_file.write(bencodepy.encode(torrent_data))
 
+
+
 if __name__ == "__main__":
-    folder_path = "./algorithmic-puzzles.pdf"
+    folder_path = "D:\\backend\p2p\peer-harbor\\utils\\temp.txt"
     output_torrent_path = "books.torrent"
     announce_url = "http://your.tracker/announce"
+
 
     create_torrent(folder_path, output_torrent_path, announce_url)
 
