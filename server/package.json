@@ -1,0 +1,11 @@
+{
+  "name": "server-p2p",
+  "version": "1.0.0",
+  "description": "Server side for p2p based file sharing client",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sahil Samel, Parth Shah",
+  "license": "ISC"
+}
