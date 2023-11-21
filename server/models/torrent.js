@@ -16,9 +16,10 @@ const TorrentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  recipient: {
+  //Need to add a unique check.
+  peerSet: [{
     type: String,
-  },
+  }],
   torrentFile: {
     type: Buffer, 
     required: true,

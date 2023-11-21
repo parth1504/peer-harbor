@@ -6,6 +6,7 @@ torrent_data = {
     'announce': 'udp://tracker.example.com:6969/announce',
     'info': {
         'name': 'gta5_folder',
+        'files': {'length':447,'path': 'D:\\backend\p2p\peer-harbor\\utils\\temp.txt'},
         'piece length': 8,  # 8-byte piece length
         'pieces': b'',  # Placeholder for piece hashes, will be populated later
         # Other info about files, etc.
