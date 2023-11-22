@@ -9,6 +9,7 @@ torrents = {}
 
 @bp.route('/announce', methods=['GET'])
 def announce():
+    print("req recedived")
     info_hash = request.args.get('info_hash')
     peer_id = request.args.get('peer_id')
     ip = request.args.get('ip')
