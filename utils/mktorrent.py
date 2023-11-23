@@ -1,10 +1,6 @@
 import hashlib
 import os
 import bencodepy
-import os
-
-
-import os
 
 def get_size(path):
     """
