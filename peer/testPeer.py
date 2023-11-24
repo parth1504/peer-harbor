@@ -1,6 +1,19 @@
 import json
 import socket
 
+
+
+def simulate_peer(peer_ip, peer_port):
+    # Simulate peer behavior
+    print(f"Simulating peer at {peer_ip}:{peer_port}")
+    
+    # Simulate some activity or data exchange
+    time.sleep(2)
+
+    # Connect to the other peer
+    connect_to_peer("127.0.0.1", 6881)  # Replace with the actual IP and port of the other peer
+
+
 def receive_file(conn, file_path):
     with open(file_path, 'wb') as file:
         chunk_size = 10
