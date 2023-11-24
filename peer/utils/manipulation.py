@@ -34,12 +34,3 @@ class Piecify:
 
         return piece_hashes, piece_indices
 
-if __name__ == "__main__":
-    file_path = "./temp.txt"
-    piece_size = 1024 * 512
-
-    piecify_instance = Piecify(file_path, piece_size)
-
-    print("Piece Hashes and Indices:")
-    for i, (hash_value, index) in enumerate(zip(piecify_instance.piece_hashes, piecify_instance.piece_indices)):
-        print(f"Piece {i + 1}: Hash={hash_value.hex()}, Index={index}")

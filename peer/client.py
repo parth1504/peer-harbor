@@ -1,3 +1,4 @@
+import json
 import requests
 import socket
 import time
@@ -50,6 +51,20 @@ print(piece_hashes,piece_indices)
 
 # Example usage:
 client_info = ClientInfo()
+client_info.create_file_info("text",7)
+print(client_info.get_file_bitfield("text"))
+
+def send_bitset(peer_socket, bitset):
+    message = {'type': 'bitset', 'data': bitset}
+    peer_socket.sendall(json.dumps(message).encode())
+
+def receive_bitset(peer_socket):
+    data = peer_socket.recv(1024)
+    if data:
+        message = json.loads(data.decode())
+        if message['type'] == 'bitset':
+            return message['data']
+    return None
 
 def receive_file(conn, file_path):
     with open(file_path, 'wb') as file:
@@ -77,9 +92,12 @@ def connect_to_peer(peer_ip, peer_port):
     try:
         client_socket.connect((peer_ip, peer_port))
         print(f"Connected to {peer_ip}:{peer_port}")
-        send_file(client_socket,"D:/backend/p2p/peer-harbor/README.md")
+        #send_file(client_socket,"D:/backend/p2p/peer-harbor/README.md")
         #client_socket.sendall(message.encode())
-
+        bitset= [0]*6
+        send_bitset(client_socket,bitset)
+        peerBitset=receive_bitset(client_socket)
+        print("Peer bitset: ",peerBitset)
         # You can send/receive data here
 
     except Exception as e:
