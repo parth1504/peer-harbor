@@ -1,8 +1,13 @@
 import socket
+import sys,os
 
-from peer-harbor.peer.testPeer import receive_bitset
+current_file_path = os.path.abspath(__file__)
+project_root = os.path.dirname(os.path.dirname(current_file_path))
+sys.path.append(project_root)
+sys.path.append("D:/backend/p2p/peer-harbor")
 
-from peer-harbor.peer.client import send_bitset
+from  strategies.pieceSelectionAlgorithm import receive_bitset
+from  strategies.pieceSelectionAlgorithm import send_bitset
 
 
 def connect_to_peer(peer_ip, peer_port):
