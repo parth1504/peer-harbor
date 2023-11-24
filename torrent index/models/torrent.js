@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
 
 const TorrentSchema = new mongoose.Schema({
+  identifier:{
+    type:String,
+    unique:true,
+    required:true,
+  },
   name: {
     type: String,
     required: true,

@@ -3,6 +3,15 @@ import socket
 import time
 
 
+def receive_file(conn, file_path):
+    with open(file_path, 'wb') as file:
+        chunk_size = 10
+        data = conn.recv(chunk_size)
+
+        while data:
+            file.write(data)
+            data = conn.recv(chunk_size)
+
 def send_file(conn, file_path):
     with open(file_path, 'rb') as file:
         chunk_size = 10
