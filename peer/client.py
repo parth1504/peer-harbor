@@ -1,7 +1,55 @@
 import requests
 import socket
 import time
+import sys,os
+from os.path import abspath, dirname
 
+current_file_path = os.path.abspath(__file__)
+project_root = os.path.dirname(os.path.dirname(current_file_path))
+sys.path.append(project_root)
+sys.path.append("D:/backend/p2p/peer-harbor")
+
+from utils.manipulation import Piecify
+
+class ClientInfo:
+    def __init__(self):
+        # Dictionary to store information for each file
+        self.file_info = {}
+
+    def create_file_info(self, file_id, total_pieces):
+        # Create information for a new file
+        if file_id not in self.file_info:
+            self.file_info[file_id] = {
+                'bitfield': [0] * total_pieces,
+                'has_pieces': set(),
+                'needed_pieces': set(range(total_pieces)),
+            }
+
+    def update_bitfield(self, file_id, piece_index):
+        # Update the bitfield and sets for a specific file
+        self.file_info[file_id]['bitfield'][piece_index] = 1
+        self.file_info[file_id]['has_pieces'].add(piece_index)
+        self.file_info[file_id]['needed_pieces'].discard(piece_index)
+
+    def get_file_bitfield(self, file_id):
+        # Return the current bitfield for a specific file
+        return self.file_info[file_id]['bitfield']
+
+    def get_file_has_pieces(self, file_id):
+        # Return the set of pieces the client has for a specific file
+        return self.file_info[file_id]['has_pieces']
+
+    def get_file_needed_pieces(self, file_id):
+        # Return the set of pieces the client still needs for a specific file
+        return self.file_info[file_id]['needed_pieces']
+
+
+hasher= Piecify("D:/backend/p2p/peer-harbor/README.md",10)
+piece_hashes, piece_indices=hasher._generate_piece_data()
+print(piece_hashes,piece_indices)
+
+# Example usage:
+client_info = ClientInfo()
 
 def receive_file(conn, file_path):
     with open(file_path, 'wb') as file:
