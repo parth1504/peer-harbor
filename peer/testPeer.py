@@ -1,6 +1,14 @@
 import json
+import os
 import socket
+import sys
+import time
 
+current_file_path = os.path.abspath(__file__)
+project_root = os.path.dirname(os.path.dirname(current_file_path))
+sys.path.append(project_root)
+
+from connection.peer import connect_to_peer
 
 
 def simulate_peer(peer_ip, peer_port):

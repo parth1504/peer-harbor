@@ -5,12 +5,15 @@ import time
 import sys,os
 from os.path import abspath, dirname
 
+
+
 current_file_path = os.path.abspath(__file__)
 project_root = os.path.dirname(os.path.dirname(current_file_path))
 sys.path.append(project_root)
-sys.path.append("D:/backend/p2p/peer-harbor")
 
 from utils.manipulation import Piecify
+from strategies.pieceSelectionAlgorithm import ClientInfo
+from connection.peer import connect_to_peer
 
 # Example usage:
 client_info = ClientInfo()
