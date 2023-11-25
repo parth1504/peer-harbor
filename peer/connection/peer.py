@@ -17,16 +17,10 @@ def connect_to_peer(peer_ip, peer_port):
     try:
         client_socket.connect((peer_ip, peer_port))
         print(f"Connected to {peer_ip}:{peer_port}")
-        #send_file(client_socket,"D:/backend/p2p/peer-harbor/README.md")
-        #client_socket.sendall(message.encode())
-        bitset= [0]*6
-        send_bitset(client_socket,bitset)
-        peerBitset=receive_bitset(client_socket)
-        print("Peer bitset: ",peerBitset)
-        # You can send/receive data here
+        return client_socket
 
     except Exception as e:
         print(f"Error: Unable to connect to {peer_ip}:{peer_port}. {e}")
 
-    finally:
-        client_socket.close()
+    #finally:
+       # client_socket.close()
