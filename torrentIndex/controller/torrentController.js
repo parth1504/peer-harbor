@@ -1,4 +1,4 @@
-import TorrentModel from "./yourModelFilePath";
+import TorrentModel from "../models/torrent.js";
 
 const searchTorrent = async (req, res) => {
   const { query } = req.query;

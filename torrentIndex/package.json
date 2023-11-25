@@ -3,9 +3,18 @@
   "version": "1.0.0",
   "description": "Server side for p2p based file sharing client",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Sahil Samel, Parth Shah",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "helmet": "^7.1.0",
+    "mongoose": "^8.0.1"
+  }
 }
