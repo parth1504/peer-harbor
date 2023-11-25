@@ -1,5 +1,5 @@
 import express from "express";
-import { searchTorrent, serveTorrent, uploadTorrent } from "../controller/torrentController";
+import { searchTorrent, serveTorrent, uploadTorrent } from "../controller/torrentController.js";
 
 const router = express.Router();
 

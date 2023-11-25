@@ -1,11 +1,6 @@
 import mongoose from 'mongoose';
 
 const TorrentSchema = new mongoose.Schema({
-  identifier:{
-    type:String,
-    unique:true,
-    required:true,
-  },
   name: {
     type: String,
     required: true,
@@ -21,10 +16,6 @@ const TorrentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  //Need to add a unique check.
-  peerSet: [{
-    type: String,
-  }],
   torrentFile: {
     type: Buffer, 
     required: true,
