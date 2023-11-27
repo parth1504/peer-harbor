@@ -34,5 +34,9 @@ class Piecify:
                 piece_indices.append(index)
                 index += 1
 
-        return pieces,piece_hashes, piece_indices
+        return pieces, piece_hashes, piece_indices
 
+def write_file_from_pieces(pieces, output_file):
+    with open(output_file, 'wb') as file:
+        for piece in pieces:
+            file.write(piece)

@@ -34,8 +34,9 @@ const serveTorrent = async (req, res) => {
 };
 
 const uploadTorrent = async (req, res) => {
-    const { name, keywords, createdBy, recipient, torrentFile } = req.body;
-
+    const { name, keywords, createdBy, recipient} = req.body;
+    const torrentFile = req.file.buffer;
+    //console.log(torrentFile)
     try {
       const newTorrent = await TorrentModel.create({
         name,
