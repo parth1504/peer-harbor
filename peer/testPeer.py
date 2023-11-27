@@ -21,24 +21,26 @@ def send_pieces(socket, index, pieces):
 
         # Calculate the hash of the serialized data
         hash_piece = hashlib.sha1(serialized_index + serialized_piece).digest()
-        
-
+        print(len(serialized_index) , len(serialized_piece),len(hash_piece))
         # Send the index, piece_data, and hash_piece
         serialized_data = serialized_index + serialized_piece + hash_piece
-        print(serialized_data)
+        print(len(serialized_data))
         socket.sendall(serialized_data)
 
     # Indicate the end of pieces transmission
     socket.sendall(b'TERMINATE')
-
 
 def receive_pieces(socket):
     if not socket:
         raise ValueError("Socket not connected")
 
     received_data = b''
+
+    # Adjust the buffer size as needed
+    buffer_size = 4096
+
     while True:
-        data = socket.recv(4096)  # Adjust the buffer size as needed
+        data = socket.recv(buffer_size)
 
         if not data:
             break  # Connection closed
@@ -46,26 +48,27 @@ def receive_pieces(socket):
         received_data += data
 
         # Check if the end of pieces transmission is reached
-        if received_data.endswith(b''):
+        if received_data.endswith(b'TERMINATE'):
+            received_data = received_data[:-len(b'TERMINATE')]
             break
 
     # Unpack the received data
     index = []
     pieces = []
 
-    while len(received_data) > 28:  # Minimum length for a valid message (8 + len(piece_data) + 20)
+    while len(received_data) >= 28:  # Minimum length for a valid message (8 + len(piece_data) + 20)
         # Unpack the header
         header_format = '!Q'
         header_size = struct.calcsize(header_format)
         index_value = struct.unpack(header_format, received_data[:header_size])[0]
 
         # Unpack the piece data
-        piece_size = len(received_data) - 28
-        piece_data_format = f'!{piece_size}s20s'
+        piece_data_size = len(received_data) - 28
+        piece_data_format = f'!{piece_data_size}s20s'
         piece_data = struct.unpack(piece_data_format, received_data[header_size:])
-        
+
         # Validate the received data by checking the hash
-        hash_piece = hashlib.sha1(struct.pack(f'!Q{piece_size}s', index_value, piece_data[0])).digest()
+        hash_piece = hashlib.sha1(struct.pack(f'!Q{piece_data_size}s', index_value, piece_data[0])).digest()
         if hash_piece != piece_data[1]:
             raise ValueError("Hash mismatch. Data may be corrupted.")
 
@@ -74,7 +77,7 @@ def receive_pieces(socket):
         pieces.append(piece_data[0])
 
         # Remove processed data from the received_data buffer
-        received_data = received_data[header_size + piece_size + 20:]
+        received_data = received_data[header_size + piece_data_size + 20:]
 
     return index, pieces
 
@@ -111,7 +114,7 @@ def receive_bitset(peer_socket):
     return None
 
 def start_server(ip, port):
-    hasher= Piecify("D:/backend/p2p/peer-harbor/README.md",10)
+    hasher= Piecify("D:/backend/p2p/peer-harbor/README.md",20)
     pieces,piece_hashes, piece_indices=hasher._generate_piece_data()
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((ip, port))
