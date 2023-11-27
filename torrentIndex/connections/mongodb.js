@@ -7,8 +7,8 @@ const mongo = async () => {
   try {
       mongoose.set('strictQuery', false);                              // Allows querying with undefined fields without generating errors.
       mongoose.connect(process.env.MongoDB, {
-      useNewUrlParser: true,                                           // To make sure MongoDB connection string is parsed properly.
-      useUnifiedTopology: true,                                        // Enables the new MongoDB driver's unified topology engine
+      // useNewUrlParser: true,                                           // To make sure MongoDB connection string is parsed properly.
+      // useUnifiedTopology: true,                                        // Enables the new MongoDB driver's unified topology engine
     });
     console.log("Connected to MongoDB Atlas");
   } catch (error) {
