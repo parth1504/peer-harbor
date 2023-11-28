@@ -27,7 +27,7 @@ class TorrentGenerator:
         subprocess.run(command, check=True)
 
     def calculate_piece_length(self, file_size):
-        return max(16384, 1 << int(math.log2(file_size / 1024) + 0.5))
+        return max(16384, 1 << int(math.log2(file_size /2 ) + 0.5))
 
 if __name__ == "__main__":
     announce_url = "http://your.tracker/announce"

@@ -20,8 +20,8 @@ if __name__ == "__main__":
     server_url = "http://localhost:6969/torrent/upload"
     
     # Get file path input from the user
-    file_path = "./invoice.pdf"
-    output_torrent_path = "./output.torrent"
+    file_path = "D:/backend/p2p/peer-harbor/README.md"
+    output_torrent_path ="D:/backend/p2p/peer-harbor/temp.md"
 
     # Get additional parameters for upload function
     name = "Invoice"
