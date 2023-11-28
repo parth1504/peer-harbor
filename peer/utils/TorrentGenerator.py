@@ -1,6 +1,12 @@
 import os
+import sys
 import subprocess
-import math
+
+current_file_path = os.path.abspath(__file__)
+project_root = os.path.dirname(os.path.dirname(current_file_path))
+sys.path.append(project_root)
+
+from utils.manipulation import calculate_piece_length
 
 class TorrentGenerator:
     def __init__(self, announce_url, file_path, output_torrent_path):
@@ -12,7 +18,7 @@ class TorrentGenerator:
 
         file_size = os.path.getsize(file_path)
 
-        piece_length = self.calculate_piece_length(file_size)
+        piece_length = calculate_piece_length(file_size)
 
         command = [
             'torrentfile', 'create',
@@ -25,9 +31,6 @@ class TorrentGenerator:
             file_path
         ]
         subprocess.run(command, check=True)
-
-    def calculate_piece_length(self, file_size):
-        return max(16384, 1 << int(math.log2(file_size / 1024) + 0.5))
 
 if __name__ == "__main__":
     announce_url = "http://your.tracker/announce"

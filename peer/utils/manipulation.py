@@ -1,4 +1,8 @@
 import hashlib
+import math
+
+def calculate_piece_length(file_size):
+    return max(16384, 1 << int(math.log2(1 if file_size < 1024 else file_size / 1024) + 0.5))
 
 class Piecify:
     def __init__(self, file_path, piece_size):
