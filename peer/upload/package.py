@@ -2,7 +2,6 @@ import base64
 import os
 import requests
 from utils.TorrentGenerator import TorrentGenerator
-
 class TorrentPackage:
     def __init__(self, announce_url, server_url, file_path, output_torrent_path):
         self.announce_url = announce_url
@@ -13,20 +12,23 @@ class TorrentPackage:
         torrent_file_path = TorrentGenerator(self.announce_url, file_path, output_torrent_path)
 
     def upload_torrent_to_server(self, torrent_file_path, name, keywords, created_by):
-        # Read the torrent file as binary data
+    # Read the torrent file as binary data
         with open(torrent_file_path, 'rb') as file:
             torrent_file_data = file.read()
 
         # Encode the torrent file data as base64
         torrent_file_base64 = base64.b64encode(torrent_file_data).decode('utf-8')
-        
+
         # Prepare the files to include the torrent file
         files = {
             'name': (None, name),
-            'keywords': (None, ','.join(keywords)),
+            'keywords': (None, ','.join(keywords)),  # Assuming keywords should be joined with commas only
             'createdBy': (None, created_by),
-            'torrentFile': (None, torrent_file_base64)
+            'torrentFile': ('torrentFile', torrent_file_base64)  # Specify the file name as 'torrentFile'
         }
+
+        # Print the constructed files dictionary
+        # print(files)
 
         # Make the HTTP POST request to the server
         response = requests.post(self.server_url, files=files)
@@ -37,6 +39,7 @@ class TorrentPackage:
         else:
             print(f"Error uploading torrent file {torrent_file_path} to server. Status Code: {response.status_code}")
             print(f"Error details: {response.text}")
+
 
 if __name__ == "__main__":
     # Set the announce URL for the tracker

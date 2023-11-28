@@ -5,7 +5,7 @@ current_file_path = os.path.abspath(__file__)
 project_root = os.path.dirname(os.path.dirname(current_file_path))
 sys.path.append(project_root)
 
-from Package import TorrentPackage
+from package import TorrentPackage
 
 class Publish:
     def __init__(self, announce_url, server_url, file_path, output_torrent_path, name, keywords, created_by):
@@ -18,9 +18,9 @@ if __name__ == "__main__":
 
     # Set the server URL for uploading
     server_url = "http://localhost:6969/torrent/upload"
-    
+
     # Get file path input from the user
-    file_path = "./invoice.pdf"
+    file_path = "./marksheets.pdf"
     output_torrent_path = "./output.torrent"
 
     # Get additional parameters for upload function
