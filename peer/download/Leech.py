@@ -1,3 +1,13 @@
+import os
+import sys
+
+current_file_path = os.path.abspath(__file__)
+project_root = os.path.dirname(os.path.dirname(current_file_path))
+sys.path.append(project_root)
+
+from connection.peer import PeerConnection
+
+
 def receive_pieces(socket):
     if not socket:
         raise ValueError("Socket not connected")
@@ -56,3 +66,20 @@ def receive_pieces(socket):
         received_data = received_data[header_size + 40:]
 
     return index, pieces
+
+class Leech:
+    def __init__ (self, announce_url, download_file_path, saved_torrent_path, seeder_ip, seeder_port):
+        self.announce_url = announce_url
+        self.download_file_path = download_file_path
+        self.saved_torrent_path = saved_torrent_path 
+        self.seeder_ip = seeder_ip
+        self.seeder_port = seeder_port
+    
+    # def get_info_from_tracker (self, tracker_url, info_hash, peer_id, ip, port, uploaded, downloaded, left, compact=0):
+    
+    def setup_leeching (self):
+        peerInstance = PeerConnection(self.seeder_ip, self.seeder_port)
+        self.LeecherSocket = peerInstance.leecher_connection()
+        
+    def start_leeching (self):
+        
