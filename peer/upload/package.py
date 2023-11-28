@@ -12,6 +12,7 @@ class TorrentPackage:
         torrent_file_path = TorrentGenerator(self.announce_url, file_path, output_torrent_path)
 
     def upload_torrent_to_server(self, torrent_file_path, name, keywords, created_by):
+        print(torrent_file_path)
     # Read the torrent file as binary data
         with open(torrent_file_path, 'rb') as file:
             torrent_file_data = file.read()
@@ -39,7 +40,6 @@ class TorrentPackage:
         else:
             print(f"Error uploading torrent file {torrent_file_path} to server. Status Code: {response.status_code}")
             print(f"Error details: {response.text}")
-
 
 if __name__ == "__main__":
     # Set the announce URL for the tracker
