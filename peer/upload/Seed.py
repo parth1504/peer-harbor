@@ -7,6 +7,9 @@ sys.path.append(project_root)
 
 from connection.peer import PeerConnection
 from Package import TorrentPackage
+import hashlib
+import struct
+
 
 def send_pieces(socket, index, pieces):
     if not socket:

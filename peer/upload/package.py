@@ -13,6 +13,7 @@ class TorrentPackage:
         torrent_file_path = TorrentGenerator(self.announce_url, file_path, output_torrent_path)
 
     def upload_torrent_to_server(self, torrent_file_path, name, keywords, created_by):
+        print(torrent_file_path)
         # Read the torrent file as binary data
         with open(torrent_file_path, 'rb') as file:
             torrent_file_data = file.read()
@@ -37,24 +38,3 @@ class TorrentPackage:
         else:
             print(f"Error uploading torrent file {torrent_file_path} to server. Status Code: {response.status_code}")
             print(f"Error details: {response.text}")
-
-if __name__ == "__main__":
-    # Set the announce URL for the tracker
-    announce_url = "http://your.tracker/announce"
-
-    # Set the server URL for uploading
-    server_url = "http://localhost:3000/upload"
-
-    # Create an instance of the TorrentPackage class
-    torrent_package = TorrentPackage(announce_url, server_url)
-
-    # Get file path input from the user
-    file_path = input("Enter the file path: ").strip()
-
-    # Get additional parameters for upload function
-    name = input("Enter the name: ").strip()
-    keywords = input("Enter the keywords (comma-separated): ").strip().split(',')
-    created_by = input("Enter the creator's name: ").strip()
-
-    # Call the package_and_upload method to create the torrent file and upload
-    torrent_package.package_and_upload(file_path, name, keywords, created_by)
