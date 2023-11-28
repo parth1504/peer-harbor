@@ -35,6 +35,7 @@ def announce():
         'left': left,
         'last_announce': time.time(),
     }
+    
 
     # Select a random subset of peers from the swarm
     selected_peers = random.sample(torrents[info_hash]['peers'].keys(), min(10, len(torrents[info_hash]['peers'])))
