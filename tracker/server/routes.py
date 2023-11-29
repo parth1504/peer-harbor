@@ -33,6 +33,8 @@ def announce():
         print("info_hash not found in Redis.")
     
     peers = redis_client.get_peers(info_hash)
+    print("out")
+    print(peers)
 
     # Update the peer information or add a new peer
     peer_data = {
@@ -45,6 +47,9 @@ def announce():
         'last_announce': time.time(),
     }
     # Check if the peer already exists in the list
+    if peers==None:
+        peers=[]
+        
     existing_peer = next((p for p in peers if p['peer_id'] == peer_id), None)
     if existing_peer:
         # Update the existing peer data
@@ -60,7 +65,7 @@ def announce():
 
 
     # Select a random subset of peers from the swarm
-    selected_peers = random.sample(peers, min(10, len(peers_list)))
+    selected_peers = random.sample(peers, min(10, len(peers)))
     print(selected_peers)
 
     # # Compact mode response
@@ -71,13 +76,13 @@ def announce():
     #     return jsonify({'peers': b''.join(compact_peers)})
 
     # Full response
-    peer_list = []
-    for peer in selected_peers:
-        peer_list.append({
-            'ip': peer['ip'],
-            'port': peer['port'],
-        })
-    print("here")
+    # peer_list = []
+    # for peer in selected_peers:
+    #     peer_list.append({
+    #         'ip': peer['ip'],
+    #         'port': peer['port'],
+    #     })
+    # print("here")
     return jsonify({'peers': peers_list})
 
 @bp.route('/scrape', methods=['GET'])
