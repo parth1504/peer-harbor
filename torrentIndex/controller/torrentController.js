@@ -52,7 +52,6 @@ const uploadTorrent = async (req, res) => {
         name,
         keywords,
         createdBy,
-        recipient,
         torrentFile: Buffer.from(torrentFile, 'base64'),
       });
 

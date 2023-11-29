@@ -1,5 +1,10 @@
 import os
 import sys
+import requests
+import threading
+import time
+import struct
+import hashlib
 
 current_file_path = os.path.abspath(__file__)
 project_root = os.path.dirname(os.path.dirname(current_file_path))
@@ -71,15 +76,67 @@ class Leech:
     def __init__ (self, announce_url, download_file_path, saved_torrent_path, seeder_ip, seeder_port):
         self.announce_url = announce_url
         self.download_file_path = download_file_path
-        self.saved_torrent_path = saved_torrent_path 
+        self.saved_torrent_path = saved_torrent_path
         self.seeder_ip = seeder_ip
         self.seeder_port = seeder_port
-    
-    # def get_info_from_tracker (self, tracker_url, info_hash, peer_id, ip, port, uploaded, downloaded, left, compact=0):
-    
+        self.is_running = True  # Flag to control the thread
+
     def setup_leeching (self):
         peerInstance = PeerConnection(self.seeder_ip, self.seeder_port)
         self.LeecherSocket = peerInstance.leecher_connection()
-        
-    def start_leeching (self):
-        
+
+    def start_leeching(self, info_hash, peer_id, ip, port, uploaded, downloaded, left):
+        # Start the background task to refresh info every 30 seconds
+        refresh_thread = threading.Thread(target=self.refresh_info_periodically, args=(info_hash, peer_id, ip, port, uploaded, downloaded, left),daemon=True)
+        refresh_thread.start()
+        # Your code for starting leeching (button click, etc.)
+
+    def refresh_info_periodically(self, info_hash, peer_id, ip, port, uploaded, downloaded, left):
+        while self.is_running:
+            # Call the method to get info from the tracker
+            self.get_info_from_tracker(self.announce_url, info_hash, peer_id, ip, port, uploaded, downloaded, left, compact=0)
+
+            # Sleep for 30 seconds before the next refresh
+            time.sleep(30)
+
+    def stop_refreshing(self):
+        # Call this method to stop the background refresh thread
+        self.is_running = False
+
+    def get_info_from_tracker (self, tracker_url, info_hash, peer_id, ip, port, uploaded, downloaded, left, compact=0):
+        # Prepare the query parameters
+        params = {
+            'info_hash': info_hash,
+            'peer_id': peer_id,
+            'ip': ip,
+            'port': port,
+            'uploaded': uploaded,
+            'downloaded': downloaded,
+            'left': left,
+            'compact': compact,
+        }
+
+        # Make the HTTP GET request to the tracker
+        response = requests.get(tracker_url, params=params)
+
+        if response.status_code == 200:
+            # Parse the response content (tracker's response)
+            tracker_response = response.content
+
+            # Adjust this parsing based on the actual response format of your tracker
+            header_format = '!Q'  # Assuming the header is a 64-bit integer
+            header_size = struct.calcsize(header_format)
+            index_value = struct.unpack(header_format, tracker_response[:header_size])[0]
+
+            # Parse the rest of the response based on the tracker's protocol
+            # ...
+
+            # Return or store the relevant information from the tracker
+            return index_value
+        else:
+            print(f"Error getting info from tracker. Status Code: {response.status_code}")
+            print(f"Error details: {response.text}")
+            return None
+
+
+
