@@ -6,9 +6,9 @@ def calculate_piece_length(file_size):
     return max(16384, 1 << int(math.log2(1 if file_size < 1024 else file_size / 1024) + 0.5))
 
 class Piecify:
-    def __init__(self, file_path, piece_size):
+    def __init__(self, file_path):
         self.file_path = file_path
-        self.piece_size = piece_size
+        self.piece_size = calculate_piece_length(file_path)
         self.pieces, self.piece_hashes, self.piece_indices = self._generate_piece_data()
 
     def read_in_chunks(self, file_object, chunk_size):
