@@ -7,7 +7,7 @@ current_file_path = os.path.abspath(__file__)
 project_root = os.path.dirname(os.path.dirname(current_file_path))
 sys.path.append(project_root)
 
-from package import TorrentPackage
+from Package import TorrentPackage
 
 class Publish:
     def __init__(self, announce_url, server_url, file_path, output_torrent_path, name, keywords, created_by):
