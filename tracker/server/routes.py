@@ -1,7 +1,16 @@
+import os
+import sys
 from flask import Blueprint, request, jsonify
 import random
 import time
 
+current_file_path = os.path.abspath(__file__)
+project_root = os.path.dirname(os.path.dirname(current_file_path))
+sys.path.append(project_root)
+
+from server.redisServer import RedisInstance
+
+redis_client= RedisInstance()
 bp = Blueprint('tracker', __name__)
 
 # In-memory storage for peers grouped by info_hash
@@ -20,9 +29,10 @@ def announce():
 
     peer_id=str(ip)+''+ str(port)
     # Create a new torrent entry if it doesn't exist
-    if info_hash not in torrents:
-        print("in")
-        torrents[info_hash] = {'peers': []}
+    if not redis_client.key_exists(info_hash):
+        print("info_hash not found in Redis.")
+    
+    peers = redis_client.get_peers(info_hash)
 
     # Update the peer information or add a new peer
     peer_data = {
@@ -35,26 +45,30 @@ def announce():
         'last_announce': time.time(),
     }
     # Check if the peer already exists in the list
-    existing_peer = next((p for p in torrents[info_hash]['peers'] if p['peer_id'] == peer_id), None)
+    existing_peer = next((p for p in peers if p['peer_id'] == peer_id), None)
     if existing_peer:
         # Update the existing peer data
         existing_peer.update(peer_data)
     else:
         # Add a new peer to the list
-        torrents[info_hash]['peers'].append(peer_data)
+        print("peer error")
+        peers.append(frozenset(peer_data.items()))
+        redis_client.add_peer(info_hash,peer_data)
     
-    print(torrents[info_hash]['peers'])
+    print("gay")
+    peers_list = [dict(peer_set) for peer_set in peers]
+
 
     # Select a random subset of peers from the swarm
-    selected_peers = random.sample(torrents[info_hash]['peers'], min(10, len(torrents[info_hash]['peers'])))
+    selected_peers = random.sample(peers, min(10, len(peers_list)))
     print(selected_peers)
 
-    # Compact mode response
-    if compact:
-        compact_peers = []
-        for peer in selected_peers:
-            compact_peers.append(peer['ip'].encode() + peer['port'].to_bytes(2, 'big'))
-        return jsonify({'peers': b''.join(compact_peers)})
+    # # Compact mode response
+    # if compact:
+    #     compact_peers = []
+    #     for peer in selected_peers:
+    #         compact_peers.append(peer['ip'].encode() + peer['port'].to_bytes(2, 'big'))
+    #     return jsonify({'peers': b''.join(compact_peers)})
 
     # Full response
     peer_list = []
@@ -63,8 +77,8 @@ def announce():
             'ip': peer['ip'],
             'port': peer['port'],
         })
-
-    return jsonify({'peers': peer_list})
+    print("here")
+    return jsonify({'peers': peers_list})
 
 @bp.route('/scrape', methods=['GET'])
 def scrape():
@@ -81,3 +95,27 @@ def scrape():
             }
 
     return jsonify({'files': scrape_data})
+
+@bp.route('/get_peers', methods=['GET'])
+def get_peers():
+    info_hash = request.args.get('info_hash')
+
+    # Check if the requested info_hash exists in the torrents dictionary
+    if info_hash in torrents:
+        # Get the list of peers for the specified info_hash
+        peers = torrents[info_hash]['peers']
+
+        # Extract a random subset of peers (you can customize this logic)
+        selected_peers = random.sample(peers, min(10, len(peers)))
+
+        # Prepare the response
+        peer_list = []
+        for peer in selected_peers:
+            peer_list.append({
+                'ip': peer['ip'],
+                'port': peer['port'],
+            })
+
+        return jsonify({'peers': peer_list})
+    else:
+        return jsonify({'error': 'Info hash not found'})
