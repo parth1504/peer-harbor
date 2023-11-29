@@ -1,5 +1,6 @@
 import hashlib
 import math
+import bencodepy
 
 def calculate_piece_length(file_size):
     return max(16384, 1 << int(math.log2(1 if file_size < 1024 else file_size / 1024) + 0.5))
@@ -44,3 +45,24 @@ def write_file_from_pieces(pieces, output_file):
     with open(output_file, 'wb') as file:
         for piece in pieces:
             file.write(piece)
+
+
+
+def calculate_info_hash(self,torrent_file_path):
+        with open(torrent_file_path, 'rb') as file:
+        # Load the .torrent file using bencode
+            torrent_data = bencodepy.decode(file.read())
+
+            # Extract the 'info' dictionary
+            info_dict = torrent_data[b'info']
+
+            # Encode the 'info' dictionary back to bytes
+            info_bytes = bencodepy.encode(info_dict)
+
+            # Calculate the SHA-1 hash of the 'info' bytes
+            info_hash = hashlib.sha1(info_bytes).digest()
+
+            # Convert the binary hash to a hexadecimal string
+            info_hash_hex = info_hash.hex()
+            print(info_hash_hex)
+            return info_hash_hex
