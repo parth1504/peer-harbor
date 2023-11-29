@@ -1,3 +1,7 @@
+import hashlib
+import struct
+
+
 def receive_pieces(socket):
     if not socket:
         raise ValueError("Socket not connected")

@@ -1,6 +1,7 @@
+import hashlib
 import os
 import sys
-
+import bencodepy
 import requests
 
 current_file_path = os.path.abspath(__file__)
@@ -13,11 +14,31 @@ class Publish:
     def __init__(self, announce_url, server_url, file_path, output_torrent_path, name, keywords, created_by):
         self.torrent_package = TorrentPackage(announce_url, server_url, file_path, output_torrent_path)
         self.torrent_package.upload_torrent_to_server(output_torrent_path, name, keywords, created_by)
-        self.announce_to_tracker(announce_url)
+        self.info_hash = self.calculate_info_hash(output_torrent_path)
+        self.announce_to_tracker(announce_url, self.info_hash)
 
-    def announce_to_tracker(self, announce_url):
+    def calculate_info_hash(self,torrent_file_path):
+        with open(torrent_file_path, 'rb') as file:
+        # Load the .torrent file using bencode
+            torrent_data = bencodepy.decode(file.read())
+
+            # Extract the 'info' dictionary
+            info_dict = torrent_data[b'info']
+
+            # Encode the 'info' dictionary back to bytes
+            info_bytes = bencodepy.encode(info_dict)
+
+            # Calculate the SHA-1 hash of the 'info' bytes
+            info_hash = hashlib.sha1(info_bytes).digest()
+
+            # Convert the binary hash to a hexadecimal string
+            info_hash_hex = info_hash.hex()
+            print(info_hash_hex)
+            return info_hash_hex
+        
+    def announce_to_tracker(self, announce_url, info_hash):
         # Get parameters for the announce request
-        info_hash = "your_info_hash"  # Replace with the actual info_hash
+        info_hash = info_hash  # Replace with the actual info_hash
         peer_id = "your_peer_id"  # Replace with the actual peer_id
         ip = "yourip2"  # Replace with the actual IP
         port = 123455  # Replace with the actual port
@@ -52,13 +73,13 @@ if __name__ == "__main__":
     server_url = "http://localhost:6969/torrent/upload"
 
     # Get file path input from the user
-    file_path = "./marksheets.pdf"
-    output_torrent_path = "./output.torrent"
+    file_path = "D:/backend/p2p/peer-harbor/temp.md"
+    output_torrent_path = "D:/backend/p2p/peer-harbor/peer/output.torrent"
 
     # Get additional parameters for upload function
-    name = "Invoice"
-    keywords = "item1, item2"
-    created_by = "Meow"
+    name = "sahil hijdi manjar"
+    keywords = "sahil, hijda"
+    created_by = "sahil hijda lavdya"
 
     # Create an instance of the Publish class
     publisher = Publish(announce_url, server_url, file_path, output_torrent_path, name, keywords, created_by)

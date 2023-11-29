@@ -35,7 +35,7 @@ class TorrentPackage:
         response = requests.post(self.server_url, files=files)
 
         # Check the response status
-        if response.status_code == 200:
+        if response.status_code == 200 or response.status_code == 201 :
             print(f"Torrent file {torrent_file_path} uploaded successfully to server: {self.server_url}")
         else:
             print(f"Error uploading torrent file {torrent_file_path} to server. Status Code: {response.status_code}")
