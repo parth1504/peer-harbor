@@ -1,3 +1,12 @@
+import os
+import sys
+
+current_file_path = os.path.abspath(__file__)
+project_root = os.path.dirname(os.path.dirname(current_file_path))
+sys.path.append(project_root)
+
+from connection.peer import PeerConnection
+from Package import TorrentPackage
 import hashlib
 import struct
 
@@ -20,3 +29,27 @@ def send_pieces(socket, index, pieces):
 
     # Indicate the end of pieces transmission
     socket.sendall(b'')
+
+class Seed:
+    def __init__ (self, announce_url, server_url, file_path, output_torrent_path, name, keywords, created_by, seeder_ip, seeder_port):
+        self.announce_url = announce_url
+        self.server_url = server_url
+        self.file_path = file_path
+        self.output_torrent_path = output_torrent_path 
+        self.name = name
+        self.keywords = keywords
+        self.created_by = created_by
+        self.seeder_ip = seeder_ip
+        self.seeder_port = seeder_port
+        
+    def package_and_publish (self):
+        torrent_package = TorrentPackage(self.announce_url, self.server_url, self.file_path, self.output_torrent_path)
+        torrent_package.upload_torrent_to_server(self.output_torrent_path, self.name, self.keywords, self.created_by)
+    
+    def setup_seeding (self):
+        peerInstance = PeerConnection(self.seeder_ip, self.seeder_port)
+        self.SeederSetup = peerInstance.seed_connection()
+        
+    def start_seeding (self):
+        
+        
