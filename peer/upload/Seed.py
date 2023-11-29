@@ -7,6 +7,7 @@ sys.path.append(project_root)
 
 from connection.peer import PeerConnection
 from Package import TorrentPackage
+from utils.manipulation import calculate_info_hash
 import hashlib
 import struct
 
@@ -45,6 +46,8 @@ class Seed:
     def package_and_publish (self):
         torrent_package = TorrentPackage(self.announce_url, self.server_url, self.file_path, self.output_torrent_path)
         torrent_package.upload_torrent_to_server(self.output_torrent_path, self.name, self.keywords, self.created_by)
+        info_hash= calculate_info_hash(self.output_torrent_path)
+        torrent_package.announce_to_tracker(info_hash)
     
     def setup_seeding (self):
         peerInstance = PeerConnection(self.seeder_ip, self.seeder_port)

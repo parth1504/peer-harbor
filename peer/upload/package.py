@@ -2,6 +2,7 @@ import base64
 import os
 import requests
 from utils.TorrentGenerator import TorrentGenerator
+
 class TorrentPackage:
     def __init__(self, announce_url, server_url, file_path, output_torrent_path):
         self.announce_url = announce_url
@@ -35,11 +36,38 @@ class TorrentPackage:
         response = requests.post(self.server_url, files=files)
 
         # Check the response status
-        if response.status_code == 200:
+        if response.status_code == 200 or response.status_code == 201 :
             print(f"Torrent file {torrent_file_path} uploaded successfully to server: {self.server_url}")
         else:
             print(f"Error uploading torrent file {torrent_file_path} to server. Status Code: {response.status_code}")
             print(f"Error details: {response.text}")
+
+    def announce_to_tracker(self, info_hash):
+        # Get parameters for the announce request
+        info_hash = info_hash  # Replace with the actual info_hash
+        peer_id = "your_peer_id"  # Replace with the actual peer_id
+        ip = "yourip2"  # Replace with the actual IP
+        port = 123455  # Replace with the actual port
+        uploaded = 0  # Replace with the actual uploaded amount
+        downloaded = 0  # Replace with the actual downloaded amount
+        left = 0  # Replace with the actual amount left
+
+        # Make the announce request
+        params = {
+            'info_hash': info_hash,
+            'peer_id': peer_id,
+            'ip': ip,
+            'port': port,
+            'uploaded': uploaded,
+            'downloaded': downloaded,
+            'left': left,
+        }
+
+        response = requests.get(self.announce_url, params=params)
+
+        # Print the response
+        print("peer list: ")
+        print(response.text)
 
 if __name__ == "__main__":
     # Set the announce URL for the tracker

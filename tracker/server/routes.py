@@ -9,9 +9,8 @@ torrents = {}
 
 @bp.route('/announce', methods=['GET'])
 def announce():
-    print("req recedived")
+    print("req received")
     info_hash = request.args.get('info_hash')
-    peer_id = request.args.get('peer_id')
     ip = request.args.get('ip')
     port = int(request.args.get('port'))
     uploaded = int(request.args.get('uploaded'))
@@ -19,15 +18,15 @@ def announce():
     left = int(request.args.get('left'))
     compact = int(request.args.get('compact', 0))
 
-    # Create a unique identifier for the peer
-    peer_key = f"{info_hash}-{peer_id}"
-
+    peer_id=str(ip)+''+ str(port)
     # Create a new torrent entry if it doesn't exist
     if info_hash not in torrents:
-        torrents[info_hash] = {'peers': {}}
+        print("in")
+        torrents[info_hash] = {'peers': []}
 
     # Update the peer information or add a new peer
-    torrents[info_hash]['peers'][peer_key] = {
+    peer_data = {
+        'peer_id':peer_id,
         'ip': ip,
         'port': port,
         'uploaded': uploaded,
@@ -35,24 +34,34 @@ def announce():
         'left': left,
         'last_announce': time.time(),
     }
+    # Check if the peer already exists in the list
+    existing_peer = next((p for p in torrents[info_hash]['peers'] if p['peer_id'] == peer_id), None)
+    if existing_peer:
+        # Update the existing peer data
+        existing_peer.update(peer_data)
+    else:
+        # Add a new peer to the list
+        torrents[info_hash]['peers'].append(peer_data)
     
+    print(torrents[info_hash]['peers'])
 
     # Select a random subset of peers from the swarm
-    selected_peers = random.sample(torrents[info_hash]['peers'].keys(), min(10, len(torrents[info_hash]['peers'])))
+    selected_peers = random.sample(torrents[info_hash]['peers'], min(10, len(torrents[info_hash]['peers'])))
+    print(selected_peers)
 
     # Compact mode response
     if compact:
         compact_peers = []
-        for peer_key in selected_peers:
-            compact_peers.append(torrents[info_hash]['peers'][peer_key]['ip'].encode() + torrents[info_hash]['peers'][peer_key]['port'].to_bytes(2, 'big'))
+        for peer in selected_peers:
+            compact_peers.append(peer['ip'].encode() + peer['port'].to_bytes(2, 'big'))
         return jsonify({'peers': b''.join(compact_peers)})
 
     # Full response
     peer_list = []
-    for peer_key in selected_peers:
+    for peer in selected_peers:
         peer_list.append({
-            'ip': torrents[info_hash]['peers'][peer_key]['ip'],
-            'port': torrents[info_hash]['peers'][peer_key]['port'],
+            'ip': peer['ip'],
+            'port': peer['port'],
         })
 
     return jsonify({'peers': peer_list})
