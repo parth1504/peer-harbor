@@ -11,7 +11,6 @@ torrents = {}
 def announce():
     print("req received")
     info_hash = request.args.get('info_hash')
-    peer_id = request.args.get('peer_id')
     ip = request.args.get('ip')
     port = int(request.args.get('port'))
     uploaded = int(request.args.get('uploaded'))
@@ -19,9 +18,7 @@ def announce():
     left = int(request.args.get('left'))
     compact = int(request.args.get('compact', 0))
 
-    # Create a unique identifier for the peer
-    peer_key = f"{info_hash}-{peer_id}"
-
+    peer_id=str(ip)+''+ str(port)
     # Create a new torrent entry if it doesn't exist
     if info_hash not in torrents:
         print("in")
