@@ -106,14 +106,7 @@ class Leech:
     def get_info_from_tracker (self, tracker_url, info_hash, peer_id, ip, port, uploaded, downloaded, left, compact=0):
         # Prepare the query parameters
         params = {
-            'info_hash': info_hash,
-            'peer_id': peer_id,
-            'ip': ip,
-            'port': port,
-            'uploaded': uploaded,
-            'downloaded': downloaded,
-            'left': left,
-            'compact': compact,
+            'info_hash': info_hash
         }
 
         # Make the HTTP GET request to the tracker
@@ -121,22 +114,22 @@ class Leech:
 
         if response.status_code == 200:
             # Parse the response content (tracker's response)
-            tracker_response = response.content
+            tracker_response = response.json()
 
-            # Adjust this parsing based on the actual response format of your tracker
-            header_format = '!Q'  # Assuming the header is a 64-bit integer
-            header_size = struct.calcsize(header_format)
-            index_value = struct.unpack(header_format, tracker_response[:header_size])[0]
+            # Extract the list of peers from the tracker response
+            peers_info = tracker_response.get('peers', [])
 
-            # Parse the rest of the response based on the tracker's protocol
-            # ...
+            # Extract and store IP and port for each peer
+            peers_data = [{'ip': peer['ip'], 'port': peer['port']} for peer in peers_info]
 
-            # Return or store the relevant information from the tracker
-            return index_value
+            # Return the list of dictionaries representing each peer
+            return peers_data
         else:
             print(f"Error getting info from tracker. Status Code: {response.status_code}")
             print(f"Error details: {response.text}")
             return None
 
 
-
+test = Leech("announce_url", "download_file_path", "saved_torrent_path", "127.0.0.1", 6969)
+result = test.get_info_from_tracker("http://127.0.0.1:6969/get_peers", "random_info_hash", "peer_id", "ip", "port", "uploaded", "downloaded", "left", compact=0)
+print(result)
