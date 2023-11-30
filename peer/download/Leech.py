@@ -10,7 +10,7 @@ current_file_path = os.path.abspath(__file__)
 project_root = os.path.dirname(os.path.dirname(current_file_path))
 sys.path.append(project_root)
 
-from connection.peer import PeerConnection
+from connection.peer import LeechConnection
 
 
 def receive_pieces(socket):
@@ -79,11 +79,12 @@ class Leech:
         self.saved_torrent_path = saved_torrent_path
         self.seeder_ip = seeder_ip
         self.seeder_port = seeder_port
-        self.is_running = True  # Flag to control the thread
+        self.is_running = True 
 
     def setup_leeching (self):
-        peerInstance = PeerConnection(self.seeder_ip, self.seeder_port)
-        self.LeecherSocket = peerInstance.leecher_connection()
+        peerInstance = LeechConnection(self.seeder_ip, self.seeder_port)
+        peerInstance.leecher_connection()
+        self.LeecherSocket = peerInstance.leecher_transfer_socket
 
     def start_leeching(self, info_hash, peer_id, ip, port, uploaded, downloaded, left):
         # Start the background task to refresh info every 30 seconds
@@ -137,6 +138,7 @@ class Leech:
             print(f"Error getting info from tracker. Status Code: {response.status_code}")
             print(f"Error details: {response.text}")
             return None
-
-
-
+        
+test = Leech("announce_url", "download_file_path", "saved_torrent_path", "127.0.0.1", 7000)
+test.setup_leeching()
+print(test.LeecherSocket)
