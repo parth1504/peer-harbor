@@ -104,23 +104,9 @@ def scrape():
 @bp.route('/get_peers', methods=['GET'])
 def get_peers():
     info_hash = request.args.get('info_hash')
-
-    # Check if the requested info_hash exists in the torrents dictionary
-    if info_hash in torrents:
-        # Get the list of peers for the specified info_hash
-        peers = torrents[info_hash]['peers']
-
-        # Extract a random subset of peers (you can customize this logic)
-        selected_peers = random.sample(peers, min(10, len(peers)))
-
-        # Prepare the response
-        peer_list = []
-        for peer in selected_peers:
-            peer_list.append({
-                'ip': peer['ip'],
-                'port': peer['port'],
-            })
-
-        return jsonify({'peers': peer_list})
+    if(redis_client.key_exists(info_hash)):
+        peers = redis_client.get_peers(info_hash)
+        peers_list = [dict(peer_set) for peer_set in peers]
+        return jsonify({'peers': peers_list})
     else:
         return jsonify({'error': 'Info hash not found'})
