@@ -9,14 +9,8 @@ current_file_path = os.path.abspath(__file__)
 project_root = os.path.dirname(os.path.dirname(current_file_path))
 sys.path.append(project_root)
 
-<<<<<<< HEAD
-from utils.Port import find_free_port
 
-class PeerConnection:
-=======
-     
 class SeedConnection:
->>>>>>> 8dfb5cd281e2c7e6af44aed4efc36627fe331bce
     def __init__(self, peer_ip, peer_port):
         self.peer_ip = peer_ip 
         self.peer_port = peer_port 
@@ -45,16 +39,7 @@ class SeedConnection:
         seeder_transfer_socket.bind((self.peer_ip, seed_transfer_port))
         seeder_transfer_socket.listen(1)
         print("Waiting for leecher on trasfer port ", seed_transfer_port)
-        
         leecher_transfer_socket, _ = seeder_transfer_socket.accept()
-
-<<<<<<< HEAD
-        result_queue.put(leecher_transfer_socket)
-
-def close_connection(self, socket):
-=======
-        print("Accepted connection from leecher on transfer port ", seed_transfer_port)
-
         self.result_queue.put(leecher_transfer_socket)
     
     def startup_seed_connection(self):
