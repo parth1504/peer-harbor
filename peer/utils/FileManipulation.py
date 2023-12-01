@@ -4,6 +4,10 @@ import bencodepy
 import threading
 import os
 
+'''
+Piecify class is responsible for making a map where we will assign each piece an offset which will be the starting location of that 
+piece in the file. We also have read and write functions in this class where we can read or write a specific piece based on it's index
+'''
 class Piecify:
     def __init__(self, file_path, piece_size=None):
         file_exists = os.path.exists(file_path)
@@ -48,6 +52,7 @@ class Piecify:
         with self.lock:
             offset = index * self.piece_size
             with open(self.file_path, 'r+b') as file:
+                print("writing in file: ", index )
                 file.seek(offset)
                 file.write(piece)
 
@@ -57,6 +62,7 @@ class Piecify:
 
 def calculate_piece_length(file_size):
     return max(16384, 1 << int(math.log2(1 if file_size < 1024 else file_size / 1024) + 0.5))
+
 
 def calculate_info_hash(self,torrent_file_path):
         with open(torrent_file_path, 'rb') as file:

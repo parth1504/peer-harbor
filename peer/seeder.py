@@ -16,7 +16,7 @@ def start_server(ip, port):
     copy = Piecify("./Mahabharat_copy.pdf", original.piece_size)
 
     for index in range(731):
-        if(index == 727 or index == 728):
+        if(index == 0):
             continue
         try:
             sample_piece = original.read_piece(index)
@@ -26,13 +26,10 @@ def start_server(ip, port):
             print(f"Error copying piece {index}: {e}")
 
     
-    sample_piece = original.read_piece(727)
-    copy.write_piece(index, sample_piece)
-    print(f"Piece {727} copied successfully.")
+    sample_piece = original.read_piece(0)
+    copy.write_piece(0, sample_piece)
+    print(f"Piece {0} copied successfully.")
     
-    sample_piece = original.read_piece(728)
-    copy.write_piece(index, sample_piece)
-    print(f"Piece {728} copied successfully.")
 
     
 if __name__ == "__main__":
