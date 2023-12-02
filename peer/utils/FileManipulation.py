@@ -16,11 +16,11 @@ class Piecify:
                 pass
         self.file_path = file_path
         self.piece_size = piece_size or calculate_piece_length(os.path.getsize(file_path))
-        self.chunk_map = {}
+        self.piece_map = {}
         self.lock = threading.Lock()
 
-    def generate_chunk_map(self):
-        self.chunk_map = {}
+    def generate_piece_map(self):
+        self.piece_map = {}
         offset = 0
         index = 0
 
@@ -29,18 +29,15 @@ class Piecify:
                 data = file.read(self.piece_size)
                 if not data:
                     break
-                self.chunk_map[index] = offset
+                self.piece_map[index] = offset
                 offset += len(data)
                 index += 1
 
-        return self.chunk_map
-
-    # def get_chunk_location(self, index):
-    #     return self.chunk_map.get(index, None)
+        return self.piece_map
 
     def read_piece(self, index):
         with self.lock:
-            offset = self.chunk_map.get(index)
+            offset = self.piece_map.get(index)
             if offset is not None:
                 with open(self.file_path, 'rb') as file:
                     file.seek(offset)
@@ -56,7 +53,7 @@ class Piecify:
                 file.seek(offset)
                 file.write(piece)
 
-            self.chunk_map[index] = offset
+            self.piece_map[index] = offset
 
 
 
@@ -64,11 +61,23 @@ def calculate_piece_length(file_size):
     return max(16384, 1 << int(math.log2(1 if file_size < 1024 else file_size / 1024) + 0.5))
 
 
-def calculate_info_hash(self,torrent_file_path):
-        with open(torrent_file_path, 'rb') as file:
+class TorrentReader:
+    def __init__ (self, torrent_file_path):
+        self.torrent_file_path = torrent_file_path
+        self.info_hash = self.calculate_info_hash()
+        self.piece_length = self.calculate_piece_length()
+
+    def calculate_info_hash(self):
+        with open(self.torrent_file_path, 'rb') as file:
             torrent_data = bencodepy.decode(file.read())
             info_dict = torrent_data[b'info']
             info_bytes = bencodepy.encode(info_dict)
             info_hash = hashlib.sha1(info_bytes).digest()
             info_hash_hex = info_hash.hex()
             return info_hash_hex
+        
+    def calculate_piece_length(self):
+        with open(self.torrent_file_path, 'rb') as file:
+            torrent_data = bencodepy.decode(file.read())
+            piece_length = torrent_data[b'info'][b'piece length']
+            return piece_length
