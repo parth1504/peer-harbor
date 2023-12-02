@@ -3,11 +3,9 @@ import time
 
 class ClientInfo:
     def __init__(self):
-        # Dictionary to store information for each file
         self.file_info = {}
 
     def create_file_info(self, file_id, total_pieces):
-        # Create information for a new file
         if file_id not in self.file_info:
             self.file_info[file_id] = {
                 'bitfield': [0] * total_pieces,
@@ -16,21 +14,17 @@ class ClientInfo:
             }
 
     def update_bitfield(self, file_id, piece_index):
-        # Update the bitfield and sets for a specific file
         self.file_info[file_id]['bitfield'][piece_index] = 1
         self.file_info[file_id]['has_pieces'].add(piece_index)
         self.file_info[file_id]['needed_pieces'].discard(piece_index)
 
     def get_file_bitfield(self, file_id):
-        # Return the current bitfield for a specific file
         return self.file_info[file_id]['bitfield']
 
     def get_file_has_pieces(self, file_id):
-        # Return the set of pieces the client has for a specific file
         return self.file_info[file_id]['has_pieces']
 
     def get_file_needed_pieces(self, file_id):
-        # Return the set of pieces the client still needs for a specific file
         return self.file_info[file_id]['needed_pieces']
 
 def send_bitset(peer_socket, bitset):
@@ -64,12 +58,11 @@ class RarityTracker:
             metric = self.piece_metrics[piece_index]
             return min(10, max(1, metric['rarity']))
         else:
-            return None  # Handle the case where the piece index is not found
+            return None
 
     def refresh(self, initial_rarity_values):
         for index in range(self.num_pieces):
             if index < len(initial_rarity_values):
                 self.piece_metrics[index]['rarity'] = initial_rarity_values[index]
             else:
-                # Handle the case where the external array is shorter than the number of pieces
-                self.piece_metrics[index]['rarity'] = 5  # Reset to a default value
+                self.piece_metrics[index]['rarity'] = 5
