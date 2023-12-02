@@ -41,7 +41,7 @@ def receive_bitset(peer_socket):
 
 
 class RarityTracker:
-    def init(self, num_pieces, base_smoothing_factor=0.2):
+    def __init__(self, num_pieces, base_smoothing_factor=0.2):
         self.num_pieces = num_pieces
         self.base_smoothing_factor = base_smoothing_factor
         self.piece_metrics = {index: {'rarity': 5, 'base_smoothing_factor': base_smoothing_factor} for index in range(num_pieces)}
@@ -60,9 +60,9 @@ class RarityTracker:
         else:
             return None
 
-    def refresh(self, initial_rarity_values):
+    def refresh(self, global_rarity_values):
         for index in range(self.num_pieces):
-            if index < len(initial_rarity_values):
-                self.piece_metrics[index]['rarity'] = initial_rarity_values[index]
+            if index < len(global_rarity_values):
+                self.piece_metrics[index]['rarity'] = global_rarity_values[index]
             else:
                 self.piece_metrics[index]['rarity'] = 5
