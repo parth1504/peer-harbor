@@ -11,6 +11,8 @@ project_root = os.path.dirname(os.path.dirname(current_file_path))
 sys.path.append(project_root)
 
 from connection.peer import LeechConnection
+from utils.FileManipulation import Piecify, TorrentReader
+from strategies.pieceSelectionAlgorithm import RarityTracker
 
 '''
 This function will be used by the leecher in order to receive pieces from the socket, It will keep on receiving data until it comes
@@ -23,39 +25,31 @@ def receive_pieces(socket):
         raise ValueError("Socket not connected")
 
     received_data = b''
-
-    # Adjust the buffer size as needed
     buffer_size = 4096
 
     while True:
         data = socket.recv(buffer_size)
 
         if not data:
-            break  # Connection closed
+            break
 
         received_data += data
-
-        # Check if the termination string is in the received data
         terminate_index = received_data.find(b'TERMINATE')
         if terminate_index != -1:
             break
 
-    # Remove the termination string and unpack the received data
     received_data = received_data.replace(b'TERMINATE', b'')
 
     index = []
     pieces = []
 
-    while len(received_data) >= 28:  # Minimum length for a valid message (8 + len(piece_data) + 20)
-        # Unpack the header
+    while len(received_data) >= 28:
         header_format = '!Q'
         header_size = struct.calcsize(header_format)
         index_value = struct.unpack(header_format, received_data[:header_size])[0]
         print(index_value)
-        # Unpack the piece data
         remaining_data_size = len(received_data) - header_size
         if remaining_data_size < 40:
-            # Last piece is smaller than 40 bytes
             piece_data_format = f'!{remaining_data_size-20}s20s'
             read_next=remaining_data_size
         else:
@@ -68,11 +62,9 @@ def receive_pieces(socket):
         if hash_piece != piece_data[1]:
             raise ValueError("Hash mismatch. Data may be corrupted.")
         else: print("matched")
-        # Append the index and piece data to the lists
         index.append(index_value)
         pieces.append(piece_data[0])
 
-        # Remove processed data from the received_data buffer
         received_data = received_data[header_size + 40:]
 
     return index, pieces
@@ -87,48 +79,36 @@ class Leech:
         self.is_running = True 
 
     def setup_leeching (self):
+        torrent = TorrentReader(self.saved_torrent_path)
+        self.file = Piecify(self.download_file_path, torrent.piece_length)
+        self.file_rarity = RarityTracker(len(self.file.generate_piece_map()))
         peerInstance = LeechConnection(self.seeder_ip, self.seeder_port)
         peerInstance.leecher_connection()
         self.LeecherSocket = peerInstance.leecher_transfer_socket
 
     def start_leeching(self, info_hash, peer_id, ip, port, uploaded, downloaded, left):
-        # Start the background task to refresh info every 30 seconds
         refresh_thread = threading.Thread(target=self.refresh_info_periodically, args=(info_hash, peer_id, ip, port, uploaded, downloaded, left),daemon=True)
         refresh_thread.start()
-        # Your code for starting leeching (button click, etc.)
 
     def refresh_info_periodically(self, info_hash, peer_id, ip, port, uploaded, downloaded, left):
         while self.is_running:
-            # Call the method to get info from the tracker
             self.get_info_from_tracker(self.announce_url, info_hash, peer_id, ip, port, uploaded, downloaded, left, compact=0)
-
-            # Sleep for 30 seconds before the next refresh
             time.sleep(30)
 
     def stop_refreshing(self):
-        # Call this method to stop the background refresh thread
         self.is_running = False
 
     def get_info_from_tracker (self, tracker_url, info_hash, peer_id, ip, port, uploaded, downloaded, left, compact=0):
-        # Prepare the query parameters
         params = {
             'info_hash': info_hash
         }
 
-        # Make the HTTP GET request to the tracker
         response = requests.get(tracker_url, params=params)
 
         if response.status_code == 200:
-            # Parse the response content (tracker's response)
             tracker_response = response.json()
-
-            # Extract the list of peers from the tracker response
             peers_info = tracker_response.get('peers', [])
-
-            # Extract and store IP and port for each peer
             peers_data = [{'ip': peer['ip'], 'port': peer['port']} for peer in peers_info]
-
-            # Return the list of dictionaries representing each peer
             return peers_data
         else:
             print(f"Error getting info from tracker. Status Code: {response.status_code}")
