@@ -10,9 +10,14 @@ current_file_path = os.path.abspath(__file__)
 project_root = os.path.dirname(os.path.dirname(current_file_path))
 sys.path.append(project_root)
 
-from connection.peer import PeerConnection
+from connection.peer import LeechConnection
 
-
+'''
+This function will be used by the leecher in order to receive pieces from the socket, It will keep on receiving data until it comes
+across the 'TERMINATE' keyword. We use unpack to deserialize the data which was serialized at sender side. The minimum size of a piece
+would be 28, index value will require 8 bytes and the SHA1 hash will require 20 bytes, based on this you allocate each piece it's index 
+and hash values on the receiver side andcalculate and compare the SHA1 hash will the hash provided to check the integrity of the message.
+'''
 def receive_pieces(socket):
     if not socket:
         raise ValueError("Socket not connected")
@@ -79,11 +84,12 @@ class Leech:
         self.saved_torrent_path = saved_torrent_path
         self.seeder_ip = seeder_ip
         self.seeder_port = seeder_port
-        self.is_running = True  # Flag to control the thread
+        self.is_running = True 
 
     def setup_leeching (self):
-        peerInstance = PeerConnection(self.seeder_ip, self.seeder_port)
-        self.LeecherSocket = peerInstance.leecher_connection()
+        peerInstance = LeechConnection(self.seeder_ip, self.seeder_port)
+        peerInstance.leecher_connection()
+        self.LeecherSocket = peerInstance.leecher_transfer_socket
 
     def start_leeching(self, info_hash, peer_id, ip, port, uploaded, downloaded, left):
         # Start the background task to refresh info every 30 seconds
@@ -128,8 +134,7 @@ class Leech:
             print(f"Error getting info from tracker. Status Code: {response.status_code}")
             print(f"Error details: {response.text}")
             return None
-
-
-test = Leech("announce_url", "download_file_path", "saved_torrent_path", "127.0.0.1", 6969)
-result = test.get_info_from_tracker("http://127.0.0.1:6969/get_peers", "random_info_hash", "peer_id", "ip", "port", "uploaded", "downloaded", "left", compact=0)
-print(result)
+        
+test = Leech("announce_url", "download_file_path", "saved_torrent_path", "127.0.0.1", 7000)
+test.setup_leeching()
+print(test.LeecherSocket)

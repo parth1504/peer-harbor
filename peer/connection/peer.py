@@ -9,16 +9,20 @@ current_file_path = os.path.abspath(__file__)
 project_root = os.path.dirname(os.path.dirname(current_file_path))
 sys.path.append(project_root)
 
+<<<<<<< HEAD
 from utils.Port import find_free_port
 
 class PeerConnection:
+=======
+
+class SeedConnection:
+>>>>>>> 8dfb5cd281e2c7e6af44aed4efc36627fe331bce
     def __init__(self, peer_ip, peer_port):
         self.peer_ip = peer_ip
         self.peer_port = peer_port
-
-    def seed_communication_connection(self):
-        result_queue = queue.Queue()
-
+        self.result_queue = queue.Queue()
+        self.seeder_communication_socket = None
+        self.startup_seed_connection()
         print("Waiting for leecher on communication ip and port ", self.peer_ip," ", self.peer_port )
 
         seeder_communication_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -68,7 +72,7 @@ class PeerConnection:
     def seed_transfer_connection(self, seed_transfer_port):
 >>>>>>> 8dfb5cd281e2c7e6af44aed4efc36627fe331bce
         seeder_transfer_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        seeder_transfer_socket.bind((self.seeder_ip, seed_transfer_port))
+        seeder_transfer_socket.bind((self.peer_ip, seed_transfer_port))
         seeder_transfer_socket.listen(1)
         print("Waiting for leecher on trasfer port ", seed_transfer_port)
 
@@ -114,7 +118,7 @@ class LeechConnection:
         seeder_transfer_port = int(leecher_communication_socket.recv(1024).decode())
 
         print("Received transfer port from Seeder: ", seeder_transfer_port)
-        close_connection(leecher_communication_socket)
+        leecher_communication_socket.close()
 
         print("Trying to connect to: ", self.peer_ip," ", seeder_transfer_port)
         leecher_transfer_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

@@ -5,13 +5,16 @@ current_file_path = os.path.abspath(__file__)
 project_root = os.path.dirname(os.path.dirname(current_file_path))
 sys.path.append(project_root)
 
-from connection.peer import PeerConnection
+from connection.peer import SeedConnection
 from Package import TorrentPackage
 from utils.manipulation import calculate_info_hash
 import hashlib
 import struct
 
-
+'''
+We need to send pieces with their respective indices to the leecher, so we will serialize the indices and data,
+calculate the SHA1 hash of pieces and append it to the data and send this to the leecher.
+'''
 def send_pieces(socket, index, pieces):
     if not socket:
         raise ValueError("Socket not connected")
@@ -50,9 +53,10 @@ class Seed:
         torrent_package.announce_to_tracker(info_hash)
     
     def setup_seeding (self):
-        peerInstance = PeerConnection(self.seeder_ip, self.seeder_port)
-        self.SeederSetup = peerInstance.seed_connection()
+        peerInstance = SeedConnection(self.seeder_ip, self.seeder_port)
+        self.SeederSocketList = peerInstance.result_queue
         
-    def start_seeding (self):
-        
-        
+    # def start_seeding (self):
+    
+test = Seed("announce_url", "server_url", "file_path", "output_torrent_path", "name", "keywords", "created_by", "127.0.0.1", 7000)
+test.setup_seeding()

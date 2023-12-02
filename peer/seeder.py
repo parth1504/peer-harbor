@@ -2,25 +2,36 @@ import hashlib
 import json,os,socket,sys,time
 import struct
 
+from utils.FileManipulation import Piecify
+
 current_file_path = os.path.abspath(__file__)
 project_root = os.path.dirname(os.path.dirname(current_file_path))
 sys.path.append(project_root)
 
-from utils.manipulation import Piecify
-from connection.peer import PeerConnection, close_connection
-from upload.Seed import send_pieces
 
 def start_server(ip, port):
-    hasher= Piecify("./output.torrent",20)
-    pieces, piece_hashes, piece_indices=hasher._generate_piece_data()
-    
-    client = PeerConnection(ip, port)
-    
-    client_socket, client_address, server_socket = client.seed_connection()
-    send_pieces(client_socket, piece_indices, pieces)
-    close_connection(client_socket)
-    close_connection(server_socket)
+    original = Piecify("./Mahabharat.pdf")
+    chunk_map = original.generate_chunk_map()
 
+    copy = Piecify("./Mahabharat_copy.pdf", original.piece_size)
+
+    for index in range(731):
+        if(index == 0):
+            continue
+        try:
+            sample_piece = original.read_piece(index)
+            copy.write_piece(index, sample_piece)
+            print(f"Piece {index} copied successfully.")
+        except Exception as e:
+            print(f"Error copying piece {index}: {e}")
+
+    
+    sample_piece = original.read_piece(0)
+    copy.write_piece(0, sample_piece)
+    print(f"Piece {0} copied successfully.")
+    
+
+    
 if __name__ == "__main__":
     server_ip = "127.0.0.1"
     server_port = 6881
