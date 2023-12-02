@@ -12,11 +12,12 @@ sys.path.append(project_root)
 def start_server(ip, port):
     original = Piecify("./Mahabharat.pdf")
     chunk_map = original.generate_chunk_map()
+    print(original.chunk_map)
 
     copy = Piecify("./Mahabharat_copy.pdf", original.piece_size)
 
     for index in range(731):
-        if(index == 727 or index == 728):
+        if(index == 727):
             continue
         try:
             sample_piece = original.read_piece(index)
@@ -27,12 +28,8 @@ def start_server(ip, port):
 
     
     sample_piece = original.read_piece(727)
-    copy.write_piece(index, sample_piece)
+    copy.write_piece(727, sample_piece)
     print(f"Piece {727} copied successfully.")
-    
-    sample_piece = original.read_piece(728)
-    copy.write_piece(index, sample_piece)
-    print(f"Piece {728} copied successfully.")
 
     
 if __name__ == "__main__":
