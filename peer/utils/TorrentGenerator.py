@@ -8,6 +8,10 @@ sys.path.append(project_root)
 
 from utils.FileManipulation import calculate_piece_length
 
+'''
+This class is used in order to generate a .torrent file which will be stored on a web server from where leechers can download it,
+this file will give information regarding which tracker to contact, info hash of file, piece length, etc.
+'''
 class TorrentGenerator:
     def __init__(self, announce_url, file_path, output_torrent_path):
         self.announce_url = announce_url

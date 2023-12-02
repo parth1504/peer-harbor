@@ -11,7 +11,10 @@ from utils.manipulation import calculate_info_hash
 import hashlib
 import struct
 
-
+'''
+We need to send pieces with their respective indices to the leecher, so we will serialize the indices and data,
+calculate the SHA1 hash of pieces and append it to the data and send this to the leecher.
+'''
 def send_pieces(socket, index, pieces):
     if not socket:
         raise ValueError("Socket not connected")

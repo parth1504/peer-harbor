@@ -12,7 +12,12 @@ sys.path.append(project_root)
 
 from connection.peer import LeechConnection
 
-
+'''
+This function will be used by the leecher in order to receive pieces from the socket, It will keep on receiving data until it comes
+across the 'TERMINATE' keyword. We use unpack to deserialize the data which was serialized at sender side. The minimum size of a piece
+would be 28, index value will require 8 bytes and the SHA1 hash will require 20 bytes, based on this you allocate each piece it's index 
+and hash values on the receiver side andcalculate and compare the SHA1 hash will the hash provided to check the integrity of the message.
+'''
 def receive_pieces(socket):
     if not socket:
         raise ValueError("Socket not connected")
