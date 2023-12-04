@@ -55,10 +55,29 @@ class Piecify:
 
             self.piece_map[index] = offset
 
+class BitArray:
+    def __init__(self, piece_map):
+        self.bit_array = self.generate_bit_array(piece_map)
 
+    def generate_bit_array(self, piece_map):
+        max_index = max(piece_map.keys(), default=-1)
+        bit_array = [1 if i in piece_map else 0 for i in range(max_index + 1)]
+        return bit_array
 
-def calculate_piece_length(file_size):
-    return max(16384, 1 << int(math.log2(1 if file_size < 1024 else file_size / 1024) + 0.5))
+    def set_bit(self, index):
+        if 0 <= index < len(self.bit_array):
+            self.bit_array[index] = 1
+        else:
+            raise ValueError("Index out of range.")
+    
+    def get_bit(self, index):
+        if 0 <= index < len(self.bit_array):
+            return self.bit_array[index]
+        else:
+            raise ValueError("Index out of range.")
+
+    def __str__(self):
+        return ''.join(map(str, self.bit_array))
 
 
 class TorrentReader:
@@ -81,3 +100,6 @@ class TorrentReader:
             torrent_data = bencodepy.decode(file.read())
             piece_length = torrent_data[b'info'][b'piece length']
             return piece_length
+        
+def calculate_piece_length(file_size):
+    return max(16384, 1 << int(math.log2(1 if file_size < 1024 else file_size / 1024) + 0.5))

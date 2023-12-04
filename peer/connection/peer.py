@@ -1,7 +1,5 @@
 import socket
 import sys,os
-import threading
-import queue
 
 current_file_path = os.path.abspath(__file__)
 project_root = os.path.dirname(os.path.dirname(current_file_path))
@@ -15,7 +13,11 @@ class SeedConnection:
         self.peer_port = peer_port 
         self.socket_dict = {}
         self.seeder_communication_socket = None
-        self.startup_seed_connection()
+        
+    def startup_seed_connection(self):
+        self.seeder_communication_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.seeder_communication_socket.bind((self.peer_ip, self.peer_port))
+        self.seeder_communication_socket.listen(1)
         print("Waiting for leecher on communication ip and port ", self.peer_ip," ", self.peer_port)
 
         while self.seeder_communication_socket:
@@ -32,15 +34,9 @@ class SeedConnection:
             self.add_socket_to_queue(seed_transfer_port)
             leecher_communication_socket.close()
 
-    def seed_transfer_connection(self, seed_transfer_port):
-        seeder_transfer_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        seeder_transfer_socket.bind((self.peer_ip, seed_transfer_port))
-        seeder_transfer_socket.listen(1)
-        print("Waiting for leecher on trasfer port ", seed_transfer_port)
-
-        leecher_transfer_socket, _ = seeder_transfer_socket.accept()
-
-        print("Accepted connection from leecher on transfer port ", seed_transfer_port)
+    def close_seed_connection(self):
+        self.seeder_communication_socket.close()
+        self.socket_dict.clear()
         
     def add_socket_to_queue(self, seed_transfer_port):
         seeder_transfer_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -53,15 +49,6 @@ class SeedConnection:
         print("Accepted connection from leecher on transfer port ", seed_transfer_port)
 
         self.socket_dict[leecher_transfer_socket] = seeder_transfer_socket
-
-    def startup_seed_connection(self):
-        self.seeder_communication_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.seeder_communication_socket.bind((self.peer_ip, self.peer_port))
-        self.seeder_communication_socket.listen(1)
-
-    def close_seed_connection(self):
-        self.seeder_communication_socket.close()
-        self.socket_dict.clear()
 
 class LeechConnection:
     def __init__(self, peer_ip, peer_port):
