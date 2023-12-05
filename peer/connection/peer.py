@@ -52,11 +52,11 @@ class SeedConnection:
 
 class LeechConnection:
     def __init__(self, peer_ip, peer_port):
-        self.peer_ip = peer_ip 
+        self.peer_ip = peer_ip
         self.peer_port = peer_port
         self.leecher_transfer_socket = None
 
-    def leecher_connection(self):
+    def startup_leech_connection(self):
         print("Trying to connect to: ", self.peer_ip," ", self.peer_port )
         leecher_communication_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         leecher_communication_socket.connect((self.peer_ip, self.peer_port))
@@ -70,3 +70,6 @@ class LeechConnection:
         leecher_transfer_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         leecher_transfer_socket.connect((self.peer_ip, seeder_transfer_port))
         self.leecher_transfer_socket = leecher_transfer_socket
+        
+    def close_leech_connection (self):
+        self.leecher_transfer_socket.close()
