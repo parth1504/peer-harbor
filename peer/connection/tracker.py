@@ -1,4 +1,42 @@
-import requests
+import socket
+import requests, time, threading
+from flask import Flask, request, jsonify
+
+server_address = "http://127.0.0.1:6969"
+
+# Function to periodically send info_hash to the server
+UDP_IP = "127.0.0.1"
+UDP_PORT = 5005
+
+rarity_arrays={}
+# Function to periodically send info_hash to the server
+def send_rarity_array_periodically(info_hash):
+    while True:
+        time.sleep(15)  # 15 minutes interval
+        try:
+            requests.post(f"{server_address}/send_info_hash", json={"rarity_array": rarity_arrays[info_hash]})
+        except requests.RequestException as e:
+            print(f"Error sending info_hash to server: {e}")
+
+# Function to receive UDP messages
+def receive_udp_messages():
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as client_socket:
+        client_socket.bind((UDP_IP, UDP_PORT))
+        while True:
+            try:
+                data, addr = client_socket.recvfrom(1024)
+                decoded_data = data.decode('utf-8')
+                print(f"Received UDP message: {decoded_data}")
+            except Exception as e:
+                print(f"Error receiving UDP message: {e}")
+
+# Replace 'your_info_hash' with the actual info_hash for each peer
+send_info_hash_thread = threading.Thread(target=send_rarity_array_periodically, args=('your_info_hash',), daemon=True)
+send_info_hash_thread.start()
+
+udp_receive_thread = threading.Thread(target=receive_udp_messages, daemon=True)
+udp_receive_thread.start()
+
 
 
 def get_peer_list(tracker_url, info_hash, peer_id, ip, port, uploaded, downloaded, left, compact=0):
@@ -19,3 +57,6 @@ def get_peer_list(tracker_url, info_hash, peer_id, ip, port, uploaded, downloade
     else:
         print(f"Error: Unable to get peer list. Status Code: {response.status_code}")
         return None
+    
+while True:
+    time.sleep(1)
