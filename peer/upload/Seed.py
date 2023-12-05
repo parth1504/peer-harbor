@@ -24,7 +24,7 @@ class Seed:
         self.announce_url = announce_url
         self.server_url = server_url
         self.file_path = file_path
-        self.output_torrent_path = output_torrent_path 
+        self.output_torrent_path = output_torrent_path
         self.name = name
         self.keywords = keywords
         self.created_by = created_by
@@ -41,7 +41,7 @@ class Seed:
     def setup_seeding (self):
         self.peerInstance.startup_seed_connection()
         self.SeederSocketList = self.peerInstance.socket_dict
-        seeder = Handler(self.file_path, self.SeederSocketList, self.piecify, self.rarity_tracker)
+        seeder = Handler(self.SeederSocketList, self.piecify, self.rarity_tracker)
 
     def stop_seeding (self):
         self.peerInstance.close_seed_connection()

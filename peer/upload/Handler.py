@@ -3,8 +3,7 @@ import struct
 import threading
 
 class Handler:
-    def __init__ (self, file_path, SeederSocketList, piecify, rarity_tracker):
-        self.file_path = file_path
+    def __init__ (self, SeederSocketList, piecify, rarity_tracker):
         self.SeederSocketList = SeederSocketList
         self.piecify = piecify
         self.rarity_tracker = rarity_tracker
@@ -31,32 +30,17 @@ class Handler:
         sorted_indices = sorted(indices_rarity, key=lambda x: x[1])
         return [index for index, _ in sorted_indices]
     
-    def send_bit_array(self,socket, bit_array):
-        bit_bytes = bytes(bit_array)
-
-        # Get the length of the bit array
-        bit_array_length = len(bit_array)
-
-        # Pack the length and the bit array into a binary message
-        message = struct.pack('!I', bit_array_length) + bit_bytes
-
-        # Send the message
-        socket.sendall(message)
-
     def receive_bit_array(self, socket):
         length_bytes = socket.recv(4)
         if not length_bytes:
-            return None  # Connection closed
+            return None
 
-        # Unpack the length
         bit_array_length = struct.unpack('!I', length_bytes)[0]
 
-        # Receive the bit array
         bit_array_bytes = socket.recv(bit_array_length)
         if not bit_array_bytes:
-            return None  # Connection closed
+            return None
 
-        # Convert the received bytes back to a list of integers (0s and 1s)
         bit_array = list(map(int, bit_array_bytes))
 
         return bit_array
@@ -68,7 +52,6 @@ class Handler:
             if bit_array[index] == 1: 
                 continue
 
-            rarity_tracker.update_rarity(index, accept=True)
             offset = piece_map[index]
             piece_data = self.piecify.read_piece(offset, index, piece_map)
             self.send_piece(socket, [index], [piece_data])
@@ -84,9 +67,9 @@ class Handler:
 
         for index, bit_value in enumerate(bit_array):
             if bit_value == 0:
-                rarity_tracker.update_rarity(index, accept=False)
-            else:
                 rarity_tracker.update_rarity(index, accept=True)
+            else:
+                rarity_tracker.update_rarity(index, accept=False)
 
     def send_piece(socket, index, piece):
         if not socket:
