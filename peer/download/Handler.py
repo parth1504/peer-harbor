@@ -2,7 +2,7 @@ import struct
 import hashlib
 from utils.FileManipulation import BitArray
 
-class Handler:
+class LeecherHandler:
     def __init__(self, leecher_socket, piecify, rarity_tracker):
         self.leecher_socket = leecher_socket
         self.piecify = piecify
@@ -17,6 +17,7 @@ class Handler:
         self.bit_array.set_bit(index)
         self.rarity_tracker.add_piece(index)
         self.rarity_tracker.update_rarity(index, accept=True)
+        SeederHandler(leecher_socket, self.piecify, self.rarity_tracker)
     
     def send_bit_array(self, socket, bit_array):
         bit_bytes = bytes(bit_array)
