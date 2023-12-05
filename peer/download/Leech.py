@@ -3,8 +3,6 @@ import sys
 import requests
 import threading
 import time
-import struct
-import hashlib
 
 current_file_path = os.path.abspath(__file__)
 project_root = os.path.dirname(os.path.dirname(current_file_path))
@@ -20,54 +18,6 @@ across the 'TERMINATE' keyword. We use unpack to deserialize the data which was 
 would be 28, index value will require 8 bytes and the SHA1 hash will require 20 bytes, based on this you allocate each piece it's index 
 and hash values on the receiver side andcalculate and compare the SHA1 hash will the hash provided to check the integrity of the message.
 '''
-def receive_pieces(socket):
-    if not socket:
-        raise ValueError("Socket not connected")
-
-    received_data = b''
-    buffer_size = 4096
-
-    while True:
-        data = socket.recv(buffer_size)
-
-        if not data:
-            break
-
-        received_data += data
-        terminate_index = received_data.find(b'TERMINATE')
-        if terminate_index != -1:
-            break
-
-    received_data = received_data.replace(b'TERMINATE', b'')
-
-    index = []
-    pieces = []
-
-    while len(received_data) >= 28:
-        header_format = '!Q'
-        header_size = struct.calcsize(header_format)
-        index_value = struct.unpack(header_format, received_data[:header_size])[0]
-        print(index_value)
-        remaining_data_size = len(received_data) - header_size
-        if remaining_data_size < 40:
-            piece_data_format = f'!{remaining_data_size-20}s20s'
-            read_next=remaining_data_size
-        else:
-            piece_data_format = '20s20s'
-            read_next=40
-        piece_data = struct.unpack(piece_data_format, received_data[header_size:header_size + read_next])
-        print(piece_data)
-
-        hash_piece = hashlib.sha1(struct.pack( f'!Q{read_next-20}s', index_value, piece_data[0])).digest()
-        if hash_piece != piece_data[1]:
-            raise ValueError("Hash mismatch. Data may be corrupted.")
-        else: print("matched")
-        index.append(index_value)
-        pieces.append(piece_data[0])
-
-        received_data = received_data[header_size + 40:]
-
-    return index, pieces
 
 class Leech:
     def __init__ (self, announce_url, download_file_path, saved_torrent_path, seeder_ip, seeder_port):
