@@ -8,9 +8,11 @@ current_file_path = os.path.abspath(__file__)
 project_root = os.path.dirname(os.path.dirname(current_file_path))
 sys.path.append(project_root)
 
+from Handler import Handler
 from connection.peer import LeechConnection
 from utils.FileManipulation import Piecify, TorrentReader
 from strategies.pieceSelectionAlgorithm import RarityTracker
+from strategies.chokingAlgorithm import PeerSelection
 
 '''
 This function will be used by the leecher in order to receive pieces from the socket, It will keep on receiving data until it comes
@@ -20,51 +22,42 @@ and hash values on the receiver side andcalculate and compare the SHA1 hash will
 '''
 
 class Leech:
-    def __init__ (self, announce_url, download_file_path, saved_torrent_path, seeder_ip, seeder_port):
+    def __init__ (self, piecify, rarity_tracker, announce_url, info_hash, download_file_path):
+        self.piecify = piecify
+        self.rarity_tracker = rarity_tracker
         self.announce_url = announce_url
-        self.download_file_path = download_file_path
-        self.saved_torrent_path = saved_torrent_path
-        self.seeder_ip = seeder_ip
-        self.seeder_port = seeder_port
+        self.info_hash = info_hash
         self.is_running = True 
+        self.threads = []
 
-    def setup_leeching (self):
-        torrent = TorrentReader(self.saved_torrent_path)
-        self.file = Piecify(self.download_file_path, torrent.piece_length)
-        self.file_rarity = RarityTracker(len(self.file.generate_piece_map()))
-        peerInstance = LeechConnection(self.seeder_ip, self.seeder_port)
-        peerInstance.leecher_connection()
-        self.LeecherSocket = peerInstance.leecher_transfer_socket
-
-    def start_leeching(self, info_hash, peer_id, ip, port, uploaded, downloaded, left):
-        refresh_thread = threading.Thread(target=self.refresh_info_periodically, args=(info_hash, peer_id, ip, port, uploaded, downloaded, left),daemon=True)
-        refresh_thread.start()
-
-    def refresh_info_periodically(self, info_hash, peer_id, ip, port, uploaded, downloaded, left):
+    def setup_leeching(self):
+        self.selector = PeerSelection(self.announce_url, self.info_hash)
         while self.is_running:
-            self.get_info_from_tracker(self.announce_url, info_hash, peer_id, ip, port, uploaded, downloaded, left, compact=0)
-            time.sleep(30)
+            peers = self.selector.get_info_from_tracker()
 
-    def stop_refreshing(self):
+            for peer in peers:
+                thread = threading.Thread(target=self.setup_connection, args=(peer['ip'], peer['port']))
+                thread.start()
+                self.threads.append(thread)
+
+            time.sleep(1)
+
+    def setup_connection(self, peer_ip, peer_port):
+        peer_instance = LeechConnection(peer_ip, peer_port)
+        peer_instance.startup_leech_connection()
+        Handler(peer_instance.leecher_transfer_socket, self.piecify, self.rarity_tracker)
+
+    def stop_leeching(self):
         self.is_running = False
 
-    def get_info_from_tracker (self, tracker_url, info_hash, peer_id, ip, port, uploaded, downloaded, left, compact=0):
-        params = {
-            'info_hash': info_hash
-        }
+        for thread in self.threads:
+            thread.join()
 
-        response = requests.get(tracker_url, params=params)
 
-        if response.status_code == 200:
-            tracker_response = response.json()
-            peers_info = tracker_response.get('peers', [])
-            peers_data = [{'ip': peer['ip'], 'port': peer['port']} for peer in peers_info]
-            return peers_data
-        else:
-            print(f"Error getting info from tracker. Status Code: {response.status_code}")
-            print(f"Error details: {response.text}")
-            return None
-        
-test = Leech("announce_url", "download_file_path", "saved_torrent_path", "127.0.0.1", 7000)
+   
+torrent = TorrentReader(saved_torrent_path)
+file = Piecify(download_file_path, torrent.piece_length)
+file_rarity = RarityTracker(len(file.generate_piece_map()))  
+test = Leech("download_file_path", "saved_torrent_path", "127.0.0.1", 7000)
 test.setup_leeching()
 print(test.LeecherSocket)

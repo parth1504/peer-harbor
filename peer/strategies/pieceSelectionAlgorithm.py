@@ -1,5 +1,3 @@
-import json
-
 class RarityTracker:
     def __init__(self, num_pieces, base_smoothing_factor=0.2):
         self.num_pieces = num_pieces

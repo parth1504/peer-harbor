@@ -1,25 +1,30 @@
 import struct
 import hashlib
+from utils.FileManipulation import BitArray
 
-class Receive:
-    def __init__ (self, socket):
-        self.socket = socket
+class Handler:
+    def __init__(self, leecher_socket, piecify, rarity_tracker):
+        self.leecher_socket = leecher_socket
+        self.piecify = piecify
+        self.rarity_tracker = rarity_tracker
+        self.receive_rare_piece()
+
+    def receive_rare_piece (self):
+        array_calculator = BitArray(self.piecify.generate_piece_map())
+        self.send_bit_array(array_calculator.bit_array)
+        index, piece = self.receive_piece(self.socket)
+        self.piecify.write_piece(index, piece)
+        self.bit_array.set_bit(index)
+        self.rarity_tracker.add_piece(index)
+        self.rarity_tracker.update_rarity(index, accept=True)
     
-    def get_piece(self, index):
-        if not self.socket:
-            raise ValueError("Socket not connected")
-
-        header = struct.pack('!Q', index)
-        self.socket.send(header)
-
-        index_received, piece_received = self.receive_piece()
-
-        if index_received != index:
-            raise ValueError("Received piece index does not match the requested index")
-
-        return piece_received
-        
-    def transfer_handler(socket):
+    def send_bit_array(self, socket, bit_array):
+        bit_bytes = bytes(bit_array)
+        bit_array_length = len(bit_array)
+        message = struct.pack('!I', bit_array_length) + bit_bytes
+        socket.sendall(message)
+    
+    def receive_piece(self, socket):
         if not socket:
             raise ValueError("Socket not connected")
 
@@ -42,7 +47,7 @@ class Receive:
         index = None
         piece = None
 
-        while len(received_data) >= 28:     #The index will be 8B and hash will be 20B
+        while len(received_data) >= 28:
             header_format = '!Q'
             header_size = struct.calcsize(header_format)
             index_value = struct.unpack(header_format, received_data[:header_size])[0]
@@ -60,10 +65,11 @@ class Receive:
             hash_piece = hashlib.sha1(struct.pack( f'!Q{read_next-20}s', index_value, piece_data[0])).digest()
             if hash_piece != piece_data[1]:
                 raise ValueError("Hash mismatch. Data may be corrupted.")
-            else: print("matched")
-            index = index_value
-            piece = piece_data[0]
+            else:
+                print("matched")
+                index = index_value
+                piece = piece_data[0]
 
-            received_data = received_data[header_size + 40:]
+                received_data = received_data[header_size + 40:]
 
         return index, piece
