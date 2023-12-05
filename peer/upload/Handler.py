@@ -31,9 +31,35 @@ class Handler:
         sorted_indices = sorted(indices_rarity, key=lambda x: x[1])
         return [index for index, _ in sorted_indices]
     
+    def send_bit_array(self,socket, bit_array):
+        bit_bytes = bytes(bit_array)
+
+        # Get the length of the bit array
+        bit_array_length = len(bit_array)
+
+        # Pack the length and the bit array into a binary message
+        message = struct.pack('!I', bit_array_length) + bit_bytes
+
+        # Send the message
+        socket.sendall(message)
+
     def receive_bit_array(self, socket):
-        # Implement the logic to receive and decode the bit array from the receiver
-        pass
+        length_bytes = socket.recv(4)
+        if not length_bytes:
+            return None  # Connection closed
+
+        # Unpack the length
+        bit_array_length = struct.unpack('!I', length_bytes)[0]
+
+        # Receive the bit array
+        bit_array_bytes = socket.recv(bit_array_length)
+        if not bit_array_bytes:
+            return None  # Connection closed
+
+        # Convert the received bytes back to a list of integers (0s and 1s)
+        bit_array = list(map(int, bit_array_bytes))
+
+        return bit_array
     
     def send_sorted_pieces(self, socket, sorted_indices, rarity_tracker, piece_map):
         bit_array = self.receive_bit_array(socket)
@@ -44,7 +70,7 @@ class Handler:
 
             rarity_tracker.update_rarity(index, accept=True)
             offset = piece_map[index]
-            piece_data = self.read_piece_data(offset, index, piece_map)
+            piece_data = self.piecify.read_piece(offset, index, piece_map)
             self.send_piece(socket, [index], [piece_data])
             
             client_socket = socket
@@ -61,13 +87,6 @@ class Handler:
                 rarity_tracker.update_rarity(index, accept=False)
             else:
                 rarity_tracker.update_rarity(index, accept=True)
-
-    def read_piece_data(self, offset, index, piece_map):
-        piece_size = piece_map[index]
-        with open(self.file_path, 'rb') as file:
-            file.seek(offset)
-            piece_data = file.read(piece_size)
-        return piece_data
 
     def send_piece(socket, index, piece):
         if not socket:
