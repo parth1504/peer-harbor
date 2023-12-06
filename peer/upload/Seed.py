@@ -8,7 +8,7 @@ sys.path.append(project_root)
 
 from connection.peer import SeedConnection
 from Package import TorrentPackage
-from utils.FileManipulation import Piecify, calculate_info_hash
+from utils.FileManipulation import Piecify, TorrentReader
 from strategies.pieceSelectionAlgorithm import RarityTracker
 from Handler import Handler
 
@@ -31,17 +31,18 @@ class Seed:
         self.seeder_ip = seeder_ip
         self.seeder_port = seeder_port
         self.peerInstance = SeedConnection(self.seeder_ip, self.seeder_port)
+        self.torrentReader= TorrentReader()
         
     def package_and_publish (self):
         torrent_package = TorrentPackage(self.announce_url, self.server_url, self.file_path, self.output_torrent_path)
         torrent_package.upload_torrent_to_server(self.output_torrent_path, self.name, self.keywords, self.created_by)
-        info_hash = calculate_info_hash(self.output_torrent_path)
+        info_hash = self.torrentReader.calculate_info_hash(self.output_torrent_path)
         torrent_package.announce_to_tracker(info_hash)
     
     def setup_seeding (self):
         self.peerInstance.startup_seed_connection()
-        self.SeederSocketList = self.peerInstance.socket_dict
-        seeder = Handler(self.SeederSocketList, self.piecify, self.rarity_tracker)
+        #self.SeederSocketList = self.peerInstance.socket_dict
+        seeder = Handler(self.peerInstance.socket_dict, self.piecify, self.rarity_tracker)
 
     def stop_seeding (self):
         self.peerInstance.close_seed_connection()

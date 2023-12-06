@@ -8,6 +8,7 @@ class Handler:
         self.piecify = piecify
         self.rarity_tracker = rarity_tracker
         self.start_handler_threads()
+        self.lock = threading.Lock()
     
     def start_handler_threads(self):
         threads = []
@@ -26,7 +27,8 @@ class Handler:
             print(f"Error in send_sorted_pieces_wrapper: {e}")
     
     def sort_indices_by_rarity(self, rarity_tracker):
-        indices_rarity = [(index, rarity_tracker.get_rarity(index)) for index in range(rarity_tracker.num_pieces)]
+        with self.lock:
+            indices_rarity = [(index, rarity_tracker.get_rarity(index)) for index in range(rarity_tracker.num_pieces)]
         sorted_indices = sorted(indices_rarity, key=lambda x: x[1])
         return [index for index, _ in sorted_indices]
     
@@ -53,7 +55,7 @@ class Handler:
                 continue
 
             offset = piece_map[index]
-            piece_data = self.piecify.read_piece(offset, index, piece_map)
+            piece_data = self.piecify.read_piece(index)
             self.send_piece(socket, [index], [piece_data])
             
             client_socket = socket
@@ -66,10 +68,11 @@ class Handler:
             break
 
         for index, bit_value in enumerate(bit_array):
-            if bit_value == 0:
-                rarity_tracker.update_rarity(index, accept=True)
-            else:
-                rarity_tracker.update_rarity(index, accept=False)
+            with self.lock:
+                if bit_value == 0:
+                    rarity_tracker.update_rarity(index, accept=True)
+                else:
+                    rarity_tracker.update_rarity(index, accept=False)
 
     def send_piece(socket, index, piece):
         if not socket:
