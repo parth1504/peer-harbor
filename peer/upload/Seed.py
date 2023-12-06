@@ -49,7 +49,8 @@ class Seed:
         
 file_path="D:/backend/p2p/peer-harbor/peer/Mahabharat.pdf"
 output_torrent_path="D:/backend/p2p/peer-harbor/peer/CopyMahabharat.pdf"
-saved_torrent_path="D:/backend/p2p/peer-harbor/peer/output.torrent"
-file = Piecify(file_path)
+saved_torrent_path="D:/backend/p2p/peer-harbor/peer/Mahabharat.torrent"
+torrent_reader = TorrentReader(saved_torrent_path)
+file = Piecify(file_path, torrent_reader.total_pieces, torrent_reader.piece_length)
 test = Seed(file,RarityTracker,"announce_url", "server_url",saved_torrent_path, output_torrent_path, "name", "keywords", "created_by", "127.0.0.1", 7000)
 test.start_seeding()

@@ -60,7 +60,7 @@ info_hash="random_info_hash"
 saved_torrent_path="D:/backend/p2p/peer-harbor/peer/output.torrent"
 download_file_path="D:/backend/p2p/peer-harbor/peer/temp.pdf"
 torrent = TorrentReader(saved_torrent_path)
-file = Piecify(download_file_path, torrent.piece_length)
+file = Piecify(download_file_path,torrent.total_pieces, torrent.piece_length)
 file_rarity = RarityTracker(len(file.generate_piece_map()))  
 test = Leech(file,file_rarity,announce_url, info_hash,"temp")
 test.setup_leeching()

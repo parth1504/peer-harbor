@@ -9,30 +9,25 @@ Piecify class is responsible for making a map where we will assign each piece an
 piece in the file. We also have read and write functions in this class where we can read or write a specific piece based on it's index
 '''
 class Piecify:
-    def __init__(self, file_path, piece_size=None):
+    def __init__(self, file_path,total_pieces, piece_size):
         file_exists = os.path.exists(file_path)
         if not file_exists:
             with open(file_path, 'wb'):
                 pass
         self.file_path = file_path
-        self.piece_size = piece_size or calculate_piece_length(os.path.getsize(file_path))
+        self.piece_size = piece_size 
         self.piece_map = {}
+        self.total_pieces= total_pieces
         self.lock = threading.Lock()
-    # issue in this function
+
     def generate_piece_map(self):
         self.piece_map = {}
-        offset = 0
-        index = 0
+        piece_length = self.piece_size
+        total_pieces = self.total_pieces
 
         with open(self.file_path, 'rb') as file:
-            while True:
-                data = file.read(self.piece_size)
-                #this will not work, since if the file is empty piece map won't be generated, even if one piece is missing in between, it will stop.
-                if not data:
-                    break
-                self.piece_map[index] = offset
-                offset += len(data)
-                index += 1
+            for index in range(total_pieces):
+                self.piece_map[index] = (index * piece_length, (index + 1) * piece_length)
 
         return self.piece_map
 
@@ -57,13 +52,23 @@ class Piecify:
             self.piece_map[index] = offset
 
 class BitArray:
-    def __init__(self, piece_map):
-        self.bit_array = self.generate_bit_array(piece_map)
+    def __init__(self, piece_map, file_path):
+        self.bit_array = self.generate_bit_array(piece_map, file_path)
 
-    def generate_bit_array(self, piece_map):
+    def check_offset(self,file_path, offset):
+        with open(file_path, 'rb') as file:
+            file.seek(offset)
+            byte = file.read(1)
+            return byte != b''
+
+    def generate_bit_array(self,piece_map, file_path):
         max_index = max(piece_map.keys(), default=-1)
-        bit_array = [1 if i in piece_map else 0 for i in range(max_index + 1)]
+        bit_array = [0] * (max_index + 1)
+        for piece_index, offset in piece_map.items():
+            if self.check_offset(file_path, offset):
+                bit_array[piece_index] = 1
         return bit_array
+
 
     def set_bit(self, index):
         if 0 <= index < len(self.bit_array):
@@ -86,10 +91,21 @@ class TorrentReader:
         self.torrent_file_path = torrent_file_path
         self.info_hash = self.calculate_info_hash()
         self.piece_length = self.calculate_piece_length()
+        self.total_pieces = self.calculate_total_pieces()
 
+    def calculate_total_pieces(self):
+        with open(self.torrent_file_path, 'rb') as file:
+            torrent_data = bencodepy.decode(file.read())
+            pieces = torrent_data[b'info'][b'pieces']
+            total_pieces = len(pieces) // 20
+            return total_pieces
+        
     def calculate_info_hash(self):
         with open(self.torrent_file_path, 'rb') as file:
             torrent_data = bencodepy.decode(file.read())
+            pieces = torrent_data[b'info'][b'pieces']
+            total_pieces = len(pieces) // 20
+            print(total_pieces)
             info_dict = torrent_data[b'info']
             info_bytes = bencodepy.encode(info_dict)
             info_hash = hashlib.sha1(info_bytes).digest()
@@ -104,3 +120,5 @@ class TorrentReader:
         
 def calculate_piece_length(file_size):
     return max(16384, 1 << int(math.log2(1 if file_size < 1024 else file_size / 1024) + 0.5))
+
+temp= TorrentReader("D:/backend/p2p/peer-harbor/peer/Mahabharat.torrent")
