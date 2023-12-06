@@ -8,7 +8,7 @@ current_file_path = os.path.abspath(__file__)
 project_root = os.path.dirname(os.path.dirname(current_file_path))
 sys.path.append(project_root)
 
-from Handler import Handler
+from Handler import LeecherHandler
 from connection.peer import LeechConnection
 from utils.FileManipulation import Piecify, TorrentReader
 from strategies.pieceSelectionAlgorithm import RarityTracker
@@ -40,12 +40,13 @@ class Leech:
                 thread.start()
                 self.threads.append(thread)
 
-            time.sleep(1)
+            time.sleep(50)
 
     def start_leeching(self, peer_ip, peer_port):
         peer_instance = LeechConnection(peer_ip, peer_port)
         peer_instance.startup_leech_connection()
-        Handler(peer_instance.leecher_transfer_socket, self.piecify, self.rarity_tracker)
+        print(peer_instance.leecher_transfer_socket)
+        LeecherHandler(peer_instance.leecher_transfer_socket, self.piecify, self.rarity_tracker)
 
     def stop_leeching(self):
         self.is_running = False
@@ -54,10 +55,13 @@ class Leech:
             thread.join()
 
 
-   
+announce_url="http://127.0.0.1:6969/get_peers"
+info_hash="random_info_hash"
+saved_torrent_path="D:/backend/p2p/peer-harbor/peer/output.torrent"
+download_file_path="D:/backend/p2p/peer-harbor/peer/temp.pdf"
 torrent = TorrentReader(saved_torrent_path)
 file = Piecify(download_file_path, torrent.piece_length)
 file_rarity = RarityTracker(len(file.generate_piece_map()))  
-test = Leech("download_file_path", "saved_torrent_path", "127.0.0.1", 7000)
+test = Leech(file,file_rarity,announce_url, info_hash,"temp")
 test.setup_leeching()
 print(test.LeecherSocket)

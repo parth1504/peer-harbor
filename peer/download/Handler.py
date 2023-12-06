@@ -5,22 +5,30 @@ import threading
 
 class LeecherHandler:
     def __init__(self, leecher_socket, piecify, rarity_tracker):
+        print("In handler")
         self.leecher_socket = leecher_socket
         self.piecify = piecify
         self.rarity_tracker = rarity_tracker
         self.receive_rare_piece()
-        self.array_calculator = BitArray(self.piecify.generate_piece_map()) #check again
         self.lock= threading.Lock()
 
     def receive_rare_piece (self):
-        self.send_bit_array(self.array_calculator.bit_array)
-        index, piece = self.receive_piece(self.socket)
+        print("in receive rare piece")#
+        print(self.piecify.file_path)#
+        piece_map=self.piecify.generate_piece_map()
+        print(piece_map)
+        array_calculator = BitArray(piece_map) #check again
+        print(array_calculator)
+        self.send_bit_array(self.leecher_socket, array_calculator.bit_array)
+        index, piece = self.receive_piece(self.leecher_socket)
+        print(index)
         with self.lock:
             self.piecify.write_piece(index, piece)
             self.array_calculator.set_bit(index)
             self.rarity_tracker.add_piece(index)
     
     def send_bit_array(self, socket, bit_array):
+        ("In send bit_array")#
         bit_bytes = bytes(bit_array)
         bit_array_length = len(bit_array)
         message = struct.pack('!I', bit_array_length) + bit_bytes

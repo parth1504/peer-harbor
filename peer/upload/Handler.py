@@ -2,6 +2,8 @@ import hashlib
 import struct
 import threading
 
+from  download.Handler import LeecherHandler
+
 class SeederHandler:
     def __init__ (self, SeederSocketList, piecify, rarity_tracker):
         self.SeederSocketList = SeederSocketList

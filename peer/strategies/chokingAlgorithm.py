@@ -7,12 +7,12 @@ class PeerSelection:
         self.announce_url = announce_url
         self.info_hash = info_hash
 
-    def get_info_from_tracker(self, tracker_url, info_hash):
+    def get_info_from_tracker(self):
         params = {
-            'info_hash': info_hash
+            'info_hash': self.info_hash
         }
 
-        response = requests.get(tracker_url, params=params)
+        response = requests.get(self.announce_url, params=params)
 
         if response.status_code == 200:
             tracker_response = response.json()

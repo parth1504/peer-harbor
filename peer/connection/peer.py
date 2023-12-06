@@ -69,7 +69,10 @@ class LeechConnection:
         print("Trying to connect to: ", self.peer_ip," ", seeder_transfer_port)
         leecher_transfer_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         leecher_transfer_socket.connect((self.peer_ip, seeder_transfer_port))
+        print("connected to port: ",seeder_transfer_port)
         self.leecher_transfer_socket = leecher_transfer_socket
+
+        print(self.leecher_transfer_socket)#
         
     def close_leech_connection (self):
         self.leecher_transfer_socket.close()

@@ -18,7 +18,7 @@ class Piecify:
         self.piece_size = piece_size or calculate_piece_length(os.path.getsize(file_path))
         self.piece_map = {}
         self.lock = threading.Lock()
-
+    # issue in this function
     def generate_piece_map(self):
         self.piece_map = {}
         offset = 0
@@ -27,6 +27,7 @@ class Piecify:
         with open(self.file_path, 'rb') as file:
             while True:
                 data = file.read(self.piece_size)
+                #this will not work, since if the file is empty piece map won't be generated, even if one piece is missing in between, it will stop.
                 if not data:
                     break
                 self.piece_map[index] = offset
