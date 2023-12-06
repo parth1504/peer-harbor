@@ -39,7 +39,7 @@ class Seed:
         info_hash = self.torrentReader.calculate_info_hash(self.output_torrent_path)
         torrent_package.announce_to_tracker(info_hash)
     
-    def setup_seeding (self):
+    def start_seeding (self):
         self.peerInstance.startup_seed_connection()
         #self.SeederSocketList = self.peerInstance.socket_dict
         seeder = Handler(self.peerInstance.socket_dict, self.piecify, self.rarity_tracker)

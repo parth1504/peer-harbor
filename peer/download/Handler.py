@@ -3,7 +3,7 @@ import hashlib
 from utils.FileManipulation import BitArray
 import threading
 
-class Handler:
+class LeecherHandler:
     def __init__(self, leecher_socket, piecify, rarity_tracker):
         self.leecher_socket = leecher_socket
         self.piecify = piecify

@@ -36,13 +36,13 @@ class Leech:
             peers = self.selector.get_info_from_tracker()
 
             for peer in peers:
-                thread = threading.Thread(target=self.setup_connection, args=(peer['ip'], peer['port']))
+                thread = threading.Thread(target=self.start_leeching, args=(peer['ip'], peer['port']))
                 thread.start()
                 self.threads.append(thread)
 
             time.sleep(1)
 
-    def setup_connection(self, peer_ip, peer_port):
+    def start_leeching(self, peer_ip, peer_port):
         peer_instance = LeechConnection(peer_ip, peer_port)
         peer_instance.startup_leech_connection()
         Handler(peer_instance.leecher_transfer_socket, self.piecify, self.rarity_tracker)
