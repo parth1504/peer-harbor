@@ -64,7 +64,8 @@ class SeederHandler:
                 continue
 
             piece_data = self.piecify.read_piece(index)
-            self.send_piece(self.client_socket, [index], [piece_data])
+            print("piece data: ", piece_data)
+            self.send_piece(self.client_socket, index, piece_data)
             
             # LeecherHandler(client_socket, self.piecify, self.rarity_tracker)
             self.client_socket.close()
@@ -80,15 +81,16 @@ class SeederHandler:
 
     def send_piece(self, socket, index, piece):
         if not socket:
-            raise ValueError("Socket not connected")
+            raise ValueError("Socket not connected") 
+        print(len(piece))
+        print("index: ", index, "piece: ", piece)
+        
+        serialized_index = struct.pack('!Q',index)
+        serialized_piece = struct.pack(f'!{len(piece)}s', piece)
 
-        for piece_index, piece_data in zip(index, piece):
-            serialized_index = struct.pack('!Q', piece_index)
-            serialized_piece = struct.pack(f'!{len(piece_data)}s', piece_data)
+        hash_piece = hashlib.sha1(serialized_index + serialized_piece).digest()
 
-            hash_piece = hashlib.sha1(serialized_index + serialized_piece).digest()
-
-            serialized_data = serialized_index + serialized_piece + hash_piece
-            socket.sendall(serialized_data)
+        serialized_data = serialized_index + serialized_piece + hash_piece
+        socket.sendall(serialized_data)
 
         socket.sendall(b'')
