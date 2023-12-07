@@ -14,11 +14,10 @@ class SeedConnection:
         self.peer_port = peer_port 
         self.socket_dict = {}
         self.connection_close = False
-        self.thread = threading.Thread(target=self.startup_seed_connection_thread, daemon=True)
+        self.thread = threading.Thread(target=self.startup_seed_connection_thread)
         
     def startup_seed_connection_thread(self):
         while not self.connection_close:
-            print(self.seeder_communication_socket)
             leecher_communication_socket, leecher_communication_address = self.seeder_communication_socket.accept()
             print(f"Accepted connection from {leecher_communication_address}")
 

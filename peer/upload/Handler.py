@@ -13,6 +13,7 @@ class SeederHandler:
         self.lock = threading.Lock()
     
     def start_handler_threads(self):
+        print("Meow")
         threads = []
         for client_socket, _ in self.SeederSocketList.items():
             thread = threading.Thread(target=self.send_sorted_pieces_wrapper, args=(client_socket,))
@@ -51,6 +52,7 @@ class SeederHandler:
         return bit_array
     
     def send_sorted_pieces(self, socket, sorted_indices, rarity_tracker, piece_map):
+        print("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
         bit_array = self.receive_bit_array(socket)
 
         for index in sorted_indices:
