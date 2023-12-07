@@ -10,7 +10,7 @@ class LeecherHandler:
         self.piecify = piecify
         self.rarity_tracker = rarity_tracker
         self.receive_rare_piece()
-        self.lock= threading.Lock()
+        # self.lock= threading.Lock()
 
     def receive_rare_piece (self):
         print("in receive rare piece")#
@@ -21,10 +21,10 @@ class LeecherHandler:
         self.send_bit_array(self.leecher_socket, array_calculator.bit_array)
         index, piece = self.receive_piece(self.leecher_socket)
         print("received piece: ", index)
-        with self.lock:
-            self.piecify.write_piece(index, piece)
-            #self.array_calculator.set_bit(index)
-            self.rarity_tracker.add_piece(index)
+        # with self.lock:
+        self.piecify.write_piece(index, piece)
+        #self.array_calculator.set_bit(index)
+        self.rarity_tracker.add_piece(index)
     
     def send_bit_array(self, socket, bit_array):
         print("In send bit_array")#

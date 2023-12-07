@@ -7,12 +7,15 @@ project_root = os.path.dirname(os.path.dirname(current_file_path))
 sys.path.append(project_root)
 
 from utils.Port import find_free_port
+from upload.Handler import SeederHandler
 
 class SeedConnection:
-    def __init__(self, peer_ip, peer_port):
+    def __init__(self, peer_ip, peer_port, piecify, rarity_tracker):
         self.peer_ip = peer_ip 
         self.peer_port = peer_port 
-        self.socket_dict = {}
+        self.piecify = piecify
+        self.rarity_tracker = rarity_tracker
+        # self.socket_dict = {}
         self.connection_close = False
         self.thread = threading.Thread(target=self.startup_seed_connection_thread)
         
@@ -27,6 +30,7 @@ class SeedConnection:
             leecher_communication_socket.send(str(seed_transfer_port).encode())
             print("socket added to queue in peer connection")
             self.add_socket_to_queue(seed_transfer_port)
+            
             leecher_communication_socket.close()
             print("in loop")
 
@@ -55,7 +59,8 @@ class SeedConnection:
 
         print("Accepted connection from leecher on transfer port ", seed_transfer_port)
 
-        self.socket_dict[leecher_transfer_socket] = seeder_transfer_socket
+        SeederHandler(leecher_transfer_socket, seeder_transfer_socket, self.piecify, self.rarity_tracker)
+        # self.socket_dict[leecher_transfer_socket] = seeder_transfer_socket
         #print("socket dictionary: ", self.socket_dict)
 
 class LeechConnection:
