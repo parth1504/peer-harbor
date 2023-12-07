@@ -96,9 +96,9 @@ class BitArray:
 class TorrentReader:
     def __init__ (self, torrent_file_path):
         self.torrent_file_path = torrent_file_path
-        # self.info_hash = self.calculate_info_hash()
-        # self.piece_length = self.calculate_piece_length()
-        # self.total_pieces = self.calculate_total_pieces()
+        self.info_hash = self.calculate_info_hash()
+        self.piece_length = self.calculate_piece_length()
+        self.total_pieces = self.calculate_total_pieces()
 
     def calculate_total_pieces(self):
         with open(self.torrent_file_path, 'rb') as file:
@@ -111,13 +111,11 @@ class TorrentReader:
         with open(self.torrent_file_path, 'rb') as file:
             print(self.torrent_file_path)
             torrent_data = bencodepy.decode(file.read())
-            pieces = torrent_data[b'info'][b'pieces']
-            total_pieces = len(pieces) // 20
-            print(total_pieces)
             info_dict = torrent_data[b'info']
             info_bytes = bencodepy.encode(info_dict)
             info_hash = hashlib.sha1(info_bytes).digest()
             info_hash_hex = info_hash.hex()
+            print(info_hash_hex)
             return info_hash_hex
         
     def calculate_piece_length(self):
