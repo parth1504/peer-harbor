@@ -40,9 +40,11 @@ class Seed:
         torrent_package.announce_to_tracker(info_hash)
     
     def start_seeding (self):
+        print("In start seeding")
         self.peerInstance.startup_seed_connection()
         #self.SeederSocketList = self.peerInstance.socket_dict
-        seeder = SeederHandler(self.peerInstance.socket_dict, self.piecify, self.rarity_tracker)
+        print("socket dictionry: ", self.peerInstance.socket_dict)
+        SeederHandler(self.peerInstance.socket_dict, self.piecify, self.rarity_tracker)
 
     def stop_seeding (self):
         self.peerInstance.close_seed_connection()
@@ -53,4 +55,5 @@ saved_torrent_path="D:/backend/p2p/peer-harbor/peer/Mahabharat.torrent"
 torrent_reader = TorrentReader(saved_torrent_path)
 file = Piecify(file_path, torrent_reader.total_pieces, torrent_reader.piece_length)
 test = Seed(file,RarityTracker,"announce_url", "server_url",saved_torrent_path, output_torrent_path, "name", "keywords", "created_by", "127.0.0.1", 7000)
+print("outside print")
 test.start_seeding()

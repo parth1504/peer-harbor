@@ -27,7 +27,7 @@ class Piecify:
 
         with open(self.file_path, 'rb') as file:
             for index in range(total_pieces):
-                self.piece_map[index] = (index * piece_length, (index + 1) * piece_length)
+                self.piece_map[index] = index * piece_length
 
         return self.piece_map
 
@@ -53,7 +53,10 @@ class Piecify:
 
 class BitArray:
     def __init__(self, piece_map, file_path):
+        print("initiated bitarray")
         self.bit_array = self.generate_bit_array(piece_map, file_path)
+        print("bitarray: ", self.bit_array)
+        self.piece_map=piece_map
 
     def check_offset(self,file_path, offset):
         with open(file_path, 'rb') as file:

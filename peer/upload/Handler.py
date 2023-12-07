@@ -35,6 +35,7 @@ class SeederHandler:
         return [index for index, _ in sorted_indices]
     
     def receive_bit_array(self, socket):
+        print("in receive bit array")
         length_bytes = socket.recv(4)
         if not length_bytes:
             return None
@@ -105,17 +106,19 @@ class SeederHandler:
         return [index for index, _ in sorted_indices]
     
     def receive_bit_array(self, socket):
+        print("In receive bit array")
         length_bytes = socket.recv(4)
         if not length_bytes:
             return None
 
         bit_array_length = struct.unpack('!I', length_bytes)[0]
-
+        print("bit array length: ", bit_array_length)
         bit_array_bytes = socket.recv(bit_array_length)
         if not bit_array_bytes:
             return None
 
         bit_array = list(map(int, bit_array_bytes))
+        print("bit array: ", bit_array)
 
         return bit_array
     

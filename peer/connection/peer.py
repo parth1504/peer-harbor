@@ -13,6 +13,7 @@ class SeedConnection:
         self.peer_port = peer_port 
         self.socket_dict = {}
         self.seeder_communication_socket = None
+        self.connection_close=False
         
     def startup_seed_connection(self):
         self.seeder_communication_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -32,7 +33,12 @@ class SeedConnection:
             print("Sending free port number ", seed_transfer_port, "to leecher")
             leecher_communication_socket.send(str(seed_transfer_port).encode())
             self.add_socket_to_queue(seed_transfer_port)
+            print("socket dictionary: ", self.socket_dict)
             leecher_communication_socket.close()
+            if self.connection_close:
+                break
+            print("in loop")
+            
 
     def close_seed_connection(self):
         self.seeder_communication_socket.close()

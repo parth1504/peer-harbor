@@ -17,22 +17,22 @@ class LeecherHandler:
         print(self.piecify.file_path)#
         piece_map=self.piecify.generate_piece_map()
         print(piece_map)
-        array_calculator = BitArray(piece_map, self.piecify.file_path) #check again
-        print(array_calculator)
+        array_calculator = BitArray(piece_map, self.piecify.file_path) 
         self.send_bit_array(self.leecher_socket, array_calculator.bit_array)
         index, piece = self.receive_piece(self.leecher_socket)
-        print(index)
+        print("received piece: ", index)
         with self.lock:
             self.piecify.write_piece(index, piece)
             #self.array_calculator.set_bit(index)
             self.rarity_tracker.add_piece(index)
     
     def send_bit_array(self, socket, bit_array):
-        ("In send bit_array")#
+        print("In send bit_array")#
         bit_bytes = bytes(bit_array)
         bit_array_length = len(bit_array)
         message = struct.pack('!I', bit_array_length) + bit_bytes
         socket.sendall(message)
+        print("sent")
     
     def receive_piece(self, socket):
         if not socket:
