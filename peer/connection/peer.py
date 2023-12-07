@@ -20,18 +20,14 @@ class SeedConnection:
         while not self.connection_close:
             leecher_communication_socket, leecher_communication_address = self.seeder_communication_socket.accept()
             print(f"Accepted connection from {leecher_communication_address}")
-
             print("Starting side thread operations")
-
             seed_transfer_port = find_free_port()
-
             print("Informing leecher of free port ", seed_transfer_port)
             print("Sending free port number ", seed_transfer_port, "to leecher")
             leecher_communication_socket.send(str(seed_transfer_port).encode())
+            print("socket added to queue in peer connection")
             self.add_socket_to_queue(seed_transfer_port)
-            
             leecher_communication_socket.close()
-            
             print("in loop")
 
         print("Exiting seed connection thread")
@@ -60,7 +56,7 @@ class SeedConnection:
         print("Accepted connection from leecher on transfer port ", seed_transfer_port)
 
         self.socket_dict[leecher_transfer_socket] = seeder_transfer_socket
-        print("socket dictionary: ", self.socket_dict)
+        #print("socket dictionary: ", self.socket_dict)
 
 class LeechConnection:
     def __init__(self, peer_ip, peer_port):

@@ -43,8 +43,8 @@ class Seed:
         print("In start seeding")
         self.peerInstance.startup_seed_connection()
         #self.SeederSocketList = self.peerInstance.socket_dict
-        # print("socket dictionry: ", self.peerInstance.socket_dict)
-        SeederHandler(self.peerInstance.socket_dict, self.piecify, self.rarity_tracker)
+        #print("socket dictionry: ", self.peerInstance.socket_dict)
+        SeederHandler(self.peerInstance, self.piecify, self.rarity_tracker)
 
     def stop_seeding (self):
         self.peerInstance.close_seed_connection()

@@ -5,8 +5,8 @@ import threading
 from  download.Handler import LeecherHandler
 
 class SeederHandler:
-    def __init__ (self, SeederSocketList, piecify, rarity_tracker):
-        self.SeederSocketList = SeederSocketList
+    def __init__ (self, SeederInstance, piecify, rarity_tracker):
+        self.SeederInstance = SeederInstance
         self.piecify = piecify
         self.rarity_tracker = rarity_tracker
         self.start_handler_threads()
@@ -15,7 +15,9 @@ class SeederHandler:
     def start_handler_threads(self):
         print("Meow")
         threads = []
-        for client_socket, _ in self.SeederSocketList.items():
+        print(self.SeederInstance.socket_dict)
+        for client_socket, _ in self.SeederInstance.socket_dict.items():
+            print("Client socket: ", client_socket)
             thread = threading.Thread(target=self.send_sorted_pieces_wrapper, args=(client_socket,))
             threads.append(thread)
             thread.start()
@@ -52,7 +54,7 @@ class SeederHandler:
         return bit_array
     
     def send_sorted_pieces(self, socket, sorted_indices, rarity_tracker, piece_map):
-        print("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
+        #print("In send_sorted_pieces")
         bit_array = self.receive_bit_array(socket)
 
         for index in sorted_indices:
@@ -64,12 +66,12 @@ class SeederHandler:
             self.send_piece(socket, [index], [piece_data])
             
             client_socket = socket
-            server_socket = self.SeederSocketList[client_socket]
+            server_socket = self.SeederInstance.socket_dict[client_socket]
             # LeecherHandler(client_socket, self.piecify, self.rarity_tracker)
             client_socket.close()
             server_socket.close()
 
-            del self.SeederSocketList[client_socket]
+            del self.SeederInstance.socket_dict[client_socket]
             break
 
         for index, bit_value in enumerate(bit_array):
