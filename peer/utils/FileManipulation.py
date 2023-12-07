@@ -9,16 +9,20 @@ Piecify class is responsible for making a map where we will assign each piece an
 piece in the file. We also have read and write functions in this class where we can read or write a specific piece based on it's index
 '''
 class Piecify:
-    def __init__(self, file_path,total_pieces, piece_size):
+    def __init__(self, file_path, piece_size = None, total_pieces = None):
         file_exists = os.path.exists(file_path)
         if not file_exists:
             with open(file_path, 'wb'):
                 pass
         self.file_path = file_path
-        self.piece_size = piece_size 
+        self.piece_size = piece_size if piece_size is not None else calculate_piece_length(os.path.getsize(self.file_path))
         self.piece_map = {}
-        self.total_pieces= total_pieces
+        self.total_pieces = total_pieces if total_pieces is not None else self.calculate_total_pieces()
         self.lock = threading.Lock()
+
+    def calculate_total_pieces(self):
+        file_size = os.path.getsize(self.file_path)
+        return file_size // self.piece_size + (file_size % self.piece_size != 0)
 
     def generate_piece_map(self):
         self.piece_map = {}
@@ -92,9 +96,9 @@ class BitArray:
 class TorrentReader:
     def __init__ (self, torrent_file_path):
         self.torrent_file_path = torrent_file_path
-        self.info_hash = self.calculate_info_hash()
-        self.piece_length = self.calculate_piece_length()
-        self.total_pieces = self.calculate_total_pieces()
+        # self.info_hash = self.calculate_info_hash()
+        # self.piece_length = self.calculate_piece_length()
+        # self.total_pieces = self.calculate_total_pieces()
 
     def calculate_total_pieces(self):
         with open(self.torrent_file_path, 'rb') as file:
@@ -105,6 +109,7 @@ class TorrentReader:
         
     def calculate_info_hash(self):
         with open(self.torrent_file_path, 'rb') as file:
+            print(self.torrent_file_path)
             torrent_data = bencodepy.decode(file.read())
             pieces = torrent_data[b'info'][b'pieces']
             total_pieces = len(pieces) // 20
@@ -124,4 +129,4 @@ class TorrentReader:
 def calculate_piece_length(file_size):
     return max(16384, 1 << int(math.log2(1 if file_size < 1024 else file_size / 1024) + 0.5))
 
-temp= TorrentReader("D:/backend/p2p/peer-harbor/peer/Mahabharat.torrent")
+# temp= TorrentReader("D:/backend/p2p/peer-harbor/peer/Mahabharat.torrent")
