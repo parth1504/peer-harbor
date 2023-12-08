@@ -13,7 +13,7 @@ class TorrentPackage:
         torrent_file_path = TorrentGenerator(self.announce_url, file_path, output_torrent_path)
 
     def upload_torrent_to_server(self, torrent_file_path, name, keywords, created_by):
-        print(torrent_file_path)
+        # print(torrent_file_path)
     # Read the torrent file as binary data
         with open(torrent_file_path, 'rb') as file:
             torrent_file_data = file.read()
@@ -66,8 +66,8 @@ class TorrentPackage:
         response = requests.get(self.announce_url, params=params)
 
         # Print the response
-        print("peer list: ")
-        print(response.text)
+        # print("peer list: ")
+        # print(response.text)
 
 if __name__ == "__main__":
     # Set the announce URL for the tracker

@@ -45,7 +45,7 @@ class Leech:
     def start_leeching(self, peer_ip, peer_port):
         peer_instance = LeechConnection(peer_ip, peer_port)
         peer_instance.startup_leech_connection()
-        print(peer_instance.leecher_transfer_socket)
+        # print(peer_instance.leecher_transfer_socket)
         LeecherHandler(peer_instance.leecher_transfer_socket, self.piecify, self.rarity_tracker)
 
     def stop_leeching(self):
@@ -64,4 +64,4 @@ file = Piecify(download_file_path,torrent.calculate_total_pieces(), torrent.calc
 file_rarity = RarityTracker(len(file.generate_piece_map()))  
 test = Leech(file,file_rarity,announce_url, info_hash,"temp")
 test.setup_leeching()
-print(test.LeecherSocket)
+# print(test.LeecherSocket)

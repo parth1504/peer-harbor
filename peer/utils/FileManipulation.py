@@ -57,9 +57,9 @@ class Piecify:
 
 class BitArray:
     def __init__(self, piece_map, file_path):
-        print("initiated bitarray")
+        # print("initiated bitarray")
         self.bit_array = self.generate_bit_array(piece_map, file_path)
-        print("bitarray: ", self.bit_array)
+        # print("bitarray: ", self.bit_array)
         self.piece_map=piece_map
 
     def check_offset(self,file_path, offset):
@@ -109,13 +109,13 @@ class TorrentReader:
         
     def calculate_info_hash(self):
         with open(self.torrent_file_path, 'rb') as file:
-            print(self.torrent_file_path)
+            # print(self.torrent_file_path)
             torrent_data = bencodepy.decode(file.read())
             info_dict = torrent_data[b'info']
             info_bytes = bencodepy.encode(info_dict)
             info_hash = hashlib.sha1(info_bytes).digest()
             info_hash_hex = info_hash.hex()
-            print(info_hash_hex)
+            # print(info_hash_hex)
             return info_hash_hex
         
     def calculate_piece_length(self):

@@ -40,7 +40,7 @@ class Seed:
         torrent_package.announce_to_tracker(info_hash)
     
     def start_seeding (self):
-        print("In start seeding")
+        # print("In start seeding")
         self.peerInstance.startup_seed_connection()
         #self.SeederSocketList = self.peerInstance.socket_dict
         #print("socket dictionry: ", self.peerInstance.socket_dict)
@@ -56,6 +56,5 @@ torrent_reader = TorrentReader(saved_torrent_path)
 file = Piecify(file_path)
 RarityTracker = RarityTracker(file.total_pieces)
 test = Seed(file,RarityTracker,"announce_url", "server_url",file_path, output_torrent_path, "name", "keywords", "created_by", "127.0.0.1", 7000)
-print("outside print")
 test.start_seeding()
 # test.stop_seeding()
