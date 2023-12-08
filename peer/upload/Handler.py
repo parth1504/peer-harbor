@@ -9,9 +9,9 @@ class SeederHandler:
         self.client_socket = client_socket
         self.piecify = piecify
         self.rarity_tracker = rarity_tracker
+        self.server_socket = server_socket
         self.send_sorted_pieces()
         # self.lock = threading.Lock()
-        self.server_socket = server_socket
     
     # def start_handler_threads(self):
     #     print("Meow")
@@ -39,7 +39,7 @@ class SeederHandler:
         return [index for index, _ in sorted_indices]
     
     def receive_bit_array(self, client_socket):
-        print("in receive bit array")
+        # print("in receive bit array")
         length_bytes = client_socket.recv(4)
         if not length_bytes:
             return None
@@ -58,12 +58,13 @@ class SeederHandler:
         sorted_indices = self.sort_indices_by_rarity(self.rarity_tracker)
         #print("In send_sorted_pieces")
         bit_array = self.receive_bit_array(self.client_socket)
-        print(" received bit array:  ", bit_array)
+        # print(" received bit array:  ", bit_array)
         for index in sorted_indices:
             if bit_array[index] == 1: 
                 continue
 
             piece_data = self.piecify.read_piece(index)
+            # print("Printing piece size: ", self.piecify.piece_size)
             #print("piece data: ", piece_data)
             self.send_piece(self.client_socket, index, piece_data)
             
@@ -83,15 +84,16 @@ class SeederHandler:
         if not socket:
             raise ValueError("Socket not connected") 
         
-        print("index: ", index)#
+        # print("index: ", index)#
         
         serialized_index = struct.pack('!Q',index)
         serialized_piece = struct.pack(f'!{len(piece)}s', piece)
-
+        index_value = struct.unpack('!Q', serialized_index)
         #hash_piece = hashlib.sha1(serialized_index + serialized_piece).digest()
 
         serialized_data = serialized_index + serialized_piece
         socket.sendall(serialized_data)
-        print("sent index ", index)#
+        # print("sent index ", index)#
+        # print("calculated index: ", index_value)
 
         socket.sendall(b'')

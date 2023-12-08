@@ -20,7 +20,7 @@ class LeecherHandler:
         array_calculator = BitArray(piece_map, self.piecify.file_path) 
         self.send_bit_array(self.leecher_socket, array_calculator.bit_array)
         index, piece = self.receive_piece(self.leecher_socket)
-        # print("received piece: ", index)
+        # print("received index: ", index)
         # with self.lock:
         self.piecify.write_piece(index, piece)
         #self.array_calculator.set_bit(index)
@@ -36,6 +36,7 @@ class LeecherHandler:
     
     def receive_piece(self, socket):
         piece_size= self.piecify.piece_size
+        # print("Printing piece size: ", self.piecify.piece_size)
         if not socket:
             raise ValueError("Socket not connected")
 
@@ -57,12 +58,13 @@ class LeecherHandler:
 
         index = None
         piece = None
-
+        count = 0
         while len(received_data) >= 8:
+            print("Counter", count)
             header_format = '!Q'
             header_size = struct.calcsize(header_format)
             index_value = struct.unpack(header_format, received_data[:header_size])[0]
-            # print(index_value)
+            # print("Received index:",index_value)
             remaining_data_size = len(received_data) - header_size
             if remaining_data_size < piece_size:
                 piece_data_format = f'!{remaining_data_size}s'
@@ -72,16 +74,18 @@ class LeecherHandler:
                 read_next=piece_size
             piece_data = struct.unpack(piece_data_format, received_data[header_size:header_size + read_next])
             # print(piece_data)
-            print("piece data: ", piece_data)#
+            # print("piece data: ", piece_data)#
 
             # hash_piece = hashlib.sha1(struct.pack( f'!Q{read_next-20}s', index_value, piece_data[0])).digest()
             # if hash_piece != piece_data[1]:
             #     raise ValueError("Hash mismatch. Data may be corrupted.")
             # else:
-            #     print("matched")
+            #     # print("matched")
             #     index = index_value
             #     piece = piece_data[0]
 
             received_data = received_data[header_size + piece_size:]
+            
+            count += 1
 
-        return index, piece
+        return index_value, piece_data[0]

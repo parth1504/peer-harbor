@@ -36,7 +36,7 @@ class Piecify:
 
     def read_piece(self, index):
         #with self.lock:
-            print("reading piece: ", index)
+            # print("reading index: ", index)
             if len(self.piece_map) == 0:
                 self.generate_piece_map()
             #print("piece map: ", self.piece_map)

@@ -40,7 +40,7 @@ class Leech:
                 thread.start()
                 self.threads.append(thread)
 
-            time.sleep(50)
+            # time.sleep(50)
 
     def start_leeching(self, peer_ip, peer_port):
         peer_instance = LeechConnection(peer_ip, peer_port)
@@ -57,10 +57,10 @@ class Leech:
 
 announce_url="http://127.0.0.1:6969/get_peers"
 info_hash="random_info_hash"
-saved_torrent_path="d:/backend/p2p/peer-harbor/peer/upload/Mahabharat.torrent"
+saved_torrent_path="./upload/Mahabharat.torrent"
 download_file_path="./temp.pdf"
 torrent = TorrentReader(saved_torrent_path)
-file = Piecify(download_file_path,torrent.calculate_total_pieces(), torrent.calculate_piece_length())
+file = Piecify(download_file_path, torrent.calculate_piece_length(), torrent.calculate_total_pieces())
 file_rarity = RarityTracker(len(file.generate_piece_map()))  
 test = Leech(file,file_rarity,announce_url, info_hash,"temp")
 test.setup_leeching()
