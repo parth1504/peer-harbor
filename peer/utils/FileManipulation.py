@@ -39,14 +39,14 @@ class Piecify:
             print("reading piece: ", index)
             if len(self.piece_map) == 0:
                 self.generate_piece_map()
-            print("piece map: ", self.piece_map)
+            #print("piece map: ", self.piece_map)
             offset = self.piece_map.get(index)
             
             if offset is not None:
                 with open(self.file_path, 'rb') as file:
                     file.seek(offset)
                     data = file.read(self.piece_size)
-                    print("data read: ", data)
+                    #print("data read: ", data)
                     return data
             else:
                 return None
@@ -65,7 +65,7 @@ class BitArray:
     def __init__(self, piece_map, file_path):
         print("initiated bitarray")
         self.bit_array = self.generate_bit_array(piece_map, file_path)
-        print("bitarray: ", self.bit_array)
+        #print("bitarray: ", self.bit_array)
         self.piece_map=piece_map
 
     def check_offset(self,file_path, offset):

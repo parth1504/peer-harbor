@@ -58,13 +58,13 @@ class SeederHandler:
         sorted_indices = self.sort_indices_by_rarity(self.rarity_tracker)
         #print("In send_sorted_pieces")
         bit_array = self.receive_bit_array(self.client_socket)
-
+        print(" received bit array:  ", bit_array)
         for index in sorted_indices:
             if bit_array[index] == 1: 
                 continue
 
             piece_data = self.piecify.read_piece(index)
-            print("piece data: ", piece_data)
+            #print("piece data: ", piece_data)
             self.send_piece(self.client_socket, index, piece_data)
             
             # LeecherHandler(client_socket, self.piecify, self.rarity_tracker)
@@ -82,15 +82,16 @@ class SeederHandler:
     def send_piece(self, socket, index, piece):
         if not socket:
             raise ValueError("Socket not connected") 
-        print(len(piece))
-        print("index: ", index, "piece: ", piece)
+        
+        print("index: ", index)#
         
         serialized_index = struct.pack('!Q',index)
         serialized_piece = struct.pack(f'!{len(piece)}s', piece)
 
-        hash_piece = hashlib.sha1(serialized_index + serialized_piece).digest()
+        #hash_piece = hashlib.sha1(serialized_index + serialized_piece).digest()
 
-        serialized_data = serialized_index + serialized_piece + hash_piece
+        serialized_data = serialized_index + serialized_piece
         socket.sendall(serialized_data)
+        print("sent index ", index)#
 
         socket.sendall(b'')
