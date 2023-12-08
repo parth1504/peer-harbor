@@ -1,6 +1,7 @@
 import struct
 import hashlib
 from utils.FileManipulation import BitArray
+from upload.Handler import SeederHandler
 import threading
 from threading import Thread, Lock
 
@@ -29,6 +30,7 @@ class LeecherHandler:
         self.lock.release()
         self.piecify.write_piece(index, piece)
         self.rarity_tracker.add_piece(index)
+        SeederHandler(self.leecher_socket, self.piecify, self.rarity_tracker)
     
     def send_bit_array(self, socket, bit_array):
         # print("In send bit_array")#

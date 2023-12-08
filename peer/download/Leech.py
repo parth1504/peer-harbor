@@ -67,7 +67,7 @@ class Leech:
 
 announce_url="http://127.0.0.1:6969/get_peers"
 info_hash="random_info_hash"
-saved_torrent_path="d:/backend/p2p/peer-harbor/peer/upload/Mahabharat.torrent"
+saved_torrent_path="./upload/Mahabharat.torrent"
 download_file_path="./temp.pdf"
 torrent = TorrentReader(saved_torrent_path)
 file = Piecify(download_file_path, torrent.calculate_piece_length(), torrent.calculate_total_pieces())

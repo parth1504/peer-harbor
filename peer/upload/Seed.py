@@ -50,9 +50,9 @@ class Seed:
         self.peerInstance.close_seed_connection()
 
 
-file_path="d:/backend/p2p/peer-harbor/peer/upload/Mahabharat.pdf"
-output_torrent_path="d:/backend/p2p/peer-harbor/peer/upload/Mahabharat.torrent"
-saved_torrent_path="d:/backend/p2p/peer-harbor/peer/upload/Mahabharat.torrent"       
+file_path="./upload/Mahabharat.pdf"
+output_torrent_path="./upload/Mahabharat.torrent"
+saved_torrent_path="./upload/Mahabharat.torrent"       
 torrent_reader = TorrentReader(saved_torrent_path)
 file = Piecify(file_path)
 RarityTracker = RarityTracker(file.total_pieces)

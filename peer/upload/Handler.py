@@ -6,7 +6,7 @@ from threading import Thread, Lock
 from  download.Handler import LeecherHandler
 
 class SeederHandler:
-    def __init__ (self, client_socket, server_socket, piecify, rarity_tracker):
+    def __init__ (self, client_socket , piecify, rarity_tracker, server_socket=None):
         self.client_socket = client_socket
         self.piecify = piecify
         self.rarity_tracker = rarity_tracker
@@ -68,10 +68,12 @@ class SeederHandler:
             # print("Printing piece size: ", self.piecify.piece_size)
             #print("piece data: ", piece_data)
             self.send_piece(self.client_socket, index, piece_data)
+            lock = Lock()
+            LeecherHandler(self.client_socket, self.piecify, self.rarity_tracker, lock)
             
-            # LeecherHandler(client_socket, self.piecify, self.rarity_tracker)
             self.client_socket.close()
-            self.server_socket.close()
+            if self.server_socket:
+                self.server_socket.close()
             break
 
         for index, bit_value in enumerate(bit_array):
