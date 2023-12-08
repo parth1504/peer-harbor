@@ -3,6 +3,7 @@ import sys
 import requests
 import threading
 import time
+import concurrent.futures
 
 current_file_path = os.path.abspath(__file__)
 project_root = os.path.dirname(os.path.dirname(current_file_path))
@@ -28,6 +29,7 @@ class Leech:
         self.announce_url = announce_url
         self.info_hash = info_hash
         self.is_running = True 
+        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
         self.threads = []
 
     def setup_leeching(self):
@@ -36,11 +38,11 @@ class Leech:
             peers = self.selector.get_info_from_tracker()
 
             for peer in peers:
-                thread = threading.Thread(target=self.start_leeching, args=(peer['ip'], peer['port']))
-                thread.start()
-                self.threads.append(thread)
-
-            # time.sleep(50)
+                self.executor.submit(self.start_leeching, peer['ip'], peer['port'])
+                # thread = threading.Thread(target=self.start_leeching, args=(peer['ip'], peer['port']))
+                # thread.start()
+                # self.threads.append(thread)
+                time.sleep(0.1)
 
     def start_leeching(self, peer_ip, peer_port):
         peer_instance = LeechConnection(peer_ip, peer_port)
@@ -50,14 +52,19 @@ class Leech:
 
     def stop_leeching(self):
         self.is_running = False
+        self.executor.shutdown(wait=True)
 
-        for thread in self.threads:
-            thread.join()
+
+    # def stop_leeching(self):
+    #     self.is_running = False
+
+    #     for thread in self.threads:
+    #         thread.join()
 
 
 announce_url="http://127.0.0.1:6969/get_peers"
 info_hash="random_info_hash"
-saved_torrent_path="./upload/Mahabharat.torrent"
+saved_torrent_path="d:/backend/p2p/peer-harbor/peer/upload/Mahabharat.torrent"
 download_file_path="./temp.pdf"
 torrent = TorrentReader(saved_torrent_path)
 file = Piecify(download_file_path, torrent.calculate_piece_length(), torrent.calculate_total_pieces())
