@@ -2,30 +2,33 @@ import struct
 import hashlib
 from utils.FileManipulation import BitArray
 import threading
+from threading import Thread, Lock
+
 
 class LeecherHandler:
-    def __init__(self, leecher_socket, piecify, rarity_tracker):
+    def __init__(self, leecher_socket, piecify, rarity_tracker,lock):
         # print("In handler")
         self.leecher_socket = leecher_socket
         self.piecify = piecify
         self.rarity_tracker = rarity_tracker
-        self.lock= threading.Lock()
-        
+        self.lock= lock        
         self.receive_rare_piece()
 
     def receive_rare_piece (self):
         # print("in receive rare piece")#
         # print(self.piecify.file_path)#
+
         piece_map=self.piecify.generate_piece_map()
         # print(piece_map)
-        array_calculator = BitArray(piece_map, self.piecify.file_path) 
+        self.lock.acquire()
+        array_calculator = BitArray(piece_map, self.piecify.file_path)
         self.send_bit_array(self.leecher_socket, array_calculator.bit_array)
         index, piece = self.receive_piece(self.leecher_socket)
-        # print("received index: ", index)
-        with self.lock:
-            self.piecify.write_piece(index, piece)
-            array_calculator.set_bit(index)    
-            self.rarity_tracker.add_piece(index)
+        #print("received index: ", index)
+        array_calculator.set_bit(index)    
+        self.lock.release()
+        self.piecify.write_piece(index, piece)
+        self.rarity_tracker.add_piece(index)
     
     def send_bit_array(self, socket, bit_array):
         # print("In send bit_array")#

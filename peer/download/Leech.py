@@ -14,6 +14,8 @@ from connection.peer import LeechConnection
 from utils.FileManipulation import Piecify, TorrentReader
 from strategies.pieceSelectionAlgorithm import RarityTracker
 from strategies.chokingAlgorithm import PeerSelection
+from threading import Thread, Lock
+
 
 '''
 This function will be used by the leecher in order to receive pieces from the socket, It will keep on receiving data until it comes
@@ -35,20 +37,21 @@ class Leech:
     def setup_leeching(self):
         self.selector = PeerSelection(self.announce_url, self.info_hash)
         while self.is_running:
+            lock = Lock()
             peers = self.selector.get_info_from_tracker()
 
             for peer in peers:
-                self.executor.submit(self.start_leeching, peer['ip'], peer['port'])
+                self.executor.submit(self.start_leeching, peer['ip'], peer['port'], lock)
                 # thread = threading.Thread(target=self.start_leeching, args=(peer['ip'], peer['port']))
                 # thread.start()
                 # self.threads.append(thread)
-                time.sleep(0.1)
+                #time.sleep(0.1)
 
-    def start_leeching(self, peer_ip, peer_port):
+    def start_leeching(self, peer_ip, peer_port,lock):
         peer_instance = LeechConnection(peer_ip, peer_port)
         peer_instance.startup_leech_connection()
         # print(peer_instance.leecher_transfer_socket)
-        LeecherHandler(peer_instance.leecher_transfer_socket, self.piecify, self.rarity_tracker)
+        LeecherHandler(peer_instance.leecher_transfer_socket, self.piecify, self.rarity_tracker, lock)
 
     def stop_leeching(self):
         self.is_running = False

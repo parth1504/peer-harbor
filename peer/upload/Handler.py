@@ -1,6 +1,7 @@
 import hashlib
 import struct
 import threading
+from threading import Thread, Lock
 
 from  download.Handler import LeecherHandler
 
