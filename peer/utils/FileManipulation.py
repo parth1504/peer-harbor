@@ -8,6 +8,7 @@ import os
 Piecify class is responsible for making a map where we will assign each piece an offset which will be the starting location of that 
 piece in the file. We also have read and write functions in this class where we can read or write a specific piece based on it's index
 '''
+
 class Piecify:
     def __init__(self, file_path, piece_size = None, total_pieces = None):
         file_exists = os.path.exists(file_path)
@@ -35,7 +36,7 @@ class Piecify:
         return self.piece_map
 
     def read_piece(self, index):
-        #with self.lock:
+        with self.lock:
             # print("reading index: ", index)
             if len(self.piece_map) == 0:
                 self.generate_piece_map()

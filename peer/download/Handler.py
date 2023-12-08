@@ -9,8 +9,8 @@ class LeecherHandler:
         self.leecher_socket = leecher_socket
         self.piecify = piecify
         self.rarity_tracker = rarity_tracker
+        self.lock= threading.Lock()
         self.receive_rare_piece()
-        # self.lock= threading.Lock()
 
     def receive_rare_piece (self):
         # print("in receive rare piece")#
@@ -60,11 +60,11 @@ class LeecherHandler:
         piece = None
         count = 0
         while len(received_data) >= 8:
-            print("Counter", count)
+            # print("Counter", count)
             header_format = '!Q'
             header_size = struct.calcsize(header_format)
             index_value = struct.unpack(header_format, received_data[:header_size])[0]
-            # print("Received index:",index_value)
+            print("Received index:",index_value)
             remaining_data_size = len(received_data) - header_size
             if remaining_data_size < piece_size:
                 piece_data_format = f'!{remaining_data_size}s'

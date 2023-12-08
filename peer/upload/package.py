@@ -65,10 +65,6 @@ class TorrentPackage:
 
         response = requests.get(self.announce_url, params=params)
 
-        # Print the response
-        # print("peer list: ")
-        # print(response.text)
-
 if __name__ == "__main__":
     # Set the announce URL for the tracker
     announce_url = "http://your.tracker/announce"

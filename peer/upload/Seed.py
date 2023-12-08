@@ -55,6 +55,6 @@ saved_torrent_path="./upload/Mahabharat.torrent"
 torrent_reader = TorrentReader(saved_torrent_path)
 file = Piecify(file_path)
 RarityTracker = RarityTracker(file.total_pieces)
-test = Seed(file,RarityTracker,"announce_url", "server_url",file_path, output_torrent_path, "name", "keywords", "created_by", "127.0.0.1", 7000)
+test = Seed(file,RarityTracker,"announce_url", "server_url",file_path, output_torrent_path, "name", "keywords", "created_by", "127.0.0.1", 9000)
 test.start_seeding()
 # test.stop_seeding()

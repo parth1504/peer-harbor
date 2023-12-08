@@ -10,8 +10,8 @@ class SeederHandler:
         self.piecify = piecify
         self.rarity_tracker = rarity_tracker
         self.server_socket = server_socket
+        self.lock = threading.Lock()
         self.send_sorted_pieces()
-        # self.lock = threading.Lock()
     
     # def start_handler_threads(self):
     #     print("Meow")
@@ -33,8 +33,8 @@ class SeederHandler:
     #         print(f"Error in send_sorted_pieces_wrapper: {e}")
     
     def sort_indices_by_rarity(self, rarity_tracker):
-        # with self.lock:
-        indices_rarity = [(index, rarity_tracker.get_rarity(index)) for index in range(rarity_tracker.num_pieces)]
+        with self.lock:
+            indices_rarity = [(index, rarity_tracker.get_rarity(index)) for index in range(rarity_tracker.num_pieces)]
         sorted_indices = sorted(indices_rarity, key=lambda x: x[1])
         return [index for index, _ in sorted_indices]
     
@@ -74,11 +74,11 @@ class SeederHandler:
             break
 
         for index, bit_value in enumerate(bit_array):
-            # with self.lock:
-            if bit_value == 0:
-                self.rarity_tracker.update_rarity(index, accept=True)
-            else:
-                self.rarity_tracker.update_rarity(index, accept=False)
+            with self.lock:
+                if bit_value == 0:
+                    self.rarity_tracker.update_rarity(index, accept=True)
+                else:
+                    self.rarity_tracker.update_rarity(index, accept=False)
 
     def send_piece(self, socket, index, piece):
         if not socket:
@@ -93,7 +93,7 @@ class SeederHandler:
 
         serialized_data = serialized_index + serialized_piece
         socket.sendall(serialized_data)
-        # print("sent index ", index)#
+        print("sent index ", index)#
         # print("calculated index: ", index_value)
 
         socket.sendall(b'')
