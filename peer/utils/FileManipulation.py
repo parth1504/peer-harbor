@@ -85,6 +85,7 @@ class BitArray:
         for piece_index, offset in piece_map.items():
             if self.check_offset(file_path, offset):
                 bit_array[piece_index] = 1
+                self.have += 1
         return bit_array
 
 

@@ -68,12 +68,14 @@ class Leech:
 
 announce_url = "http://127.0.0.1:6969/get_peers"
 info_hash = "random_info_hash"
-saved_torrent_path = "D:/backend/p2p/peer-harbor/peer/upload/Mahabharat.torrent"
-download_file_path = "./temp.pdf"
+saved_torrent_path = "./upload/Mahabharat.torrent"
+download_file_path = "./download/result.pdf"
 torrent = TorrentReader(saved_torrent_path)
 file = Piecify(download_file_path, torrent.calculate_piece_length(), torrent.calculate_total_pieces())
-bit_array= BitArray(Piecify.generate_piece_map(),download_file_path)
-file_rarity = RarityTracker(len(file.generate_piece_map()))  
-test = Leech(file, bit_array, file_rarity, announce_url, info_hash,"temp")
-test.setup_leeching()
+bit_array = BitArray( file.generate_piece_map(), download_file_path)
+
+if not bit_array.is_bit_array_complete():
+    file_rarity = RarityTracker(len(file.generate_piece_map()))  
+    test = Leech(file, bit_array, file_rarity, announce_url, info_hash,"temp")
+    test.setup_leeching()
 # print(test.LeecherSocket)
