@@ -29,9 +29,10 @@ class PeerSelection:
         
         
 class SeederHandler:
-    def __init__ (self, client_socket , piecify, rarity_tracker, server_socket=None, already_leeched = False):
+    def __init__ (self, client_socket , piecify, bit_array, rarity_tracker, server_socket=None, already_leeched = False):
         self.client_socket = client_socket
         self.piecify = piecify
+        self.bit_array= bit_array
         self.rarity_tracker = rarity_tracker
         self.server_socket = server_socket
         self.already_leeched = already_leeched
@@ -93,9 +94,9 @@ class SeederHandler:
             #print("piece data: ", piece_data)
             self.send_piece(self.client_socket, index, piece_data)
             
-            if not self.already_leeched:
+            if not self.already_leeched and not self.bit_array.is_bit_array_complete():
                 lock = Lock()
-                LeecherHandler(self.client_socket, self.piecify, self.rarity_tracker, lock, already_seeded=True)
+                LeecherHandler(self.client_socket, self.piecify,self.bit_array, self.rarity_tracker, lock, already_seeded=True)
             
             self.client_socket.close()
             if self.server_socket:
@@ -129,27 +130,28 @@ class SeederHandler:
         
 
 class LeecherHandler:
-    def __init__(self, leecher_socket, piecify, rarity_tracker, lock, already_seeded = False ):
+    def __init__(self, leecher_socket, piecify, bit_array, rarity_tracker, lock, already_seeded = False ):
         # print("In handler")
         self.leecher_socket = leecher_socket
         self.piecify = piecify
         self.rarity_tracker = rarity_tracker
         self.lock = lock  
-        self.already_seeded = already_seeded      
+        self.already_seeded = already_seeded  
+        self.bit_array= bit_array    
         self.receive_rare_piece()
 
     def receive_rare_piece (self):
         # print("in receive rare piece")`#
         # print(self.piecify.file_path)#
 
-        piece_map=self.piecify.generate_piece_map()
+        #piece_map=self.piecify.generate_piece_map()
         # print(piece_map)
         self.lock.acquire()
-        array_calculator = BitArray(piece_map, self.piecify.file_path)
-        self.send_bit_array(self.leecher_socket, array_calculator.bit_array)
+        #array_calculator = BitArray(piece_map, self.piecify.file_path)
+        self.send_bit_array(self.leecher_socket, self.bit_array.bit_array)
         index, piece = self.receive_piece(self.leecher_socket)
         #print("received index: ", index)
-        array_calculator.set_bit(index)    
+        self.bit_array.set_bit(index)    
         self.lock.release()
         self.piecify.write_piece(index, piece)
         self.rarity_tracker.add_piece(index)
@@ -163,11 +165,11 @@ class LeecherHandler:
         bit_array_length = len(bit_array)
         message = struct.pack('!I', bit_array_length) + bit_bytes
         socket.sendall(message)
-        # print("sent")
+        # print("sent") #sahil hijdya
     
     def receive_piece(self, socket):
         piece_size= self.piecify.piece_size
-        # print("Printing piece size: ", self.piecify.piece_size)
+        print("Printing piece size: ", self.piecify.piece_size)
         if not socket:
             raise ValueError("Socket not connected")
 

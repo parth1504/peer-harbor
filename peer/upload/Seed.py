@@ -8,7 +8,7 @@ sys.path.append(project_root)
 
 from connection.peer import SeedConnection
 from Package import TorrentPackage
-from utils.FileManipulation import Piecify, TorrentReader
+from utils.FileManipulation import Piecify, TorrentReader, BitArray
 from strategies.pieceSelectionAlgorithm import RarityTracker
 
 '''
@@ -17,8 +17,9 @@ calculate the SHA1 hash of pieces and append it to the data and send this to the
 '''
 
 class Seed:
-    def __init__ (self, piecify, rarity_tracker, announce_url, server_url, file_path, output_torrent_path, name, keywords, created_by, seeder_ip, seeder_port):
+    def __init__ (self, piecify,bit_array, rarity_tracker, announce_url, server_url, file_path, output_torrent_path, name, keywords, created_by, seeder_ip, seeder_port):
         self.piecify = piecify
+        self.bit_array=bit_array
         self.rarity_tracker = rarity_tracker
         self.announce_url = announce_url
         self.server_url = server_url
@@ -29,7 +30,7 @@ class Seed:
         self.created_by = created_by
         self.seeder_ip = seeder_ip
         self.seeder_port = seeder_port
-        self.peerInstance = SeedConnection(self.seeder_ip, self.seeder_port, piecify, rarity_tracker)
+        self.peerInstance = SeedConnection(self.seeder_ip, self.seeder_port, piecify,bit_array, rarity_tracker)
         self.torrentReader= TorrentReader(output_torrent_path)
         
     def package_and_publish (self):
@@ -49,12 +50,13 @@ class Seed:
         self.peerInstance.close_seed_connection()
 
 
-file_path="./upload/Mahabharat.pdf"
-output_torrent_path="./upload/Mahabharat.torrent"
-saved_torrent_path="./upload/Mahabharat.torrent"       
+file_path="D:/backend/p2p/peer-harbor/peer/upload/Mahabharat.pdf"
+output_torrent_path="D:/backend/p2p/peer-harbor/peer/upload/Mahabharat.torrent"
+saved_torrent_path="D:/backend/p2p/peer-harbor/peer/upload/Mahabharat.torrent"       
 torrent_reader = TorrentReader(saved_torrent_path)
 file = Piecify(file_path)
+bit_array= BitArray(file.piece_map,file_path)
 RarityTracker = RarityTracker(file.total_pieces)
-test = Seed(file,RarityTracker,"announce_url", "server_url",file_path, output_torrent_path, "name", "keywords", "created_by", "127.0.0.1", 9000)
+test = Seed(file,bit_array,RarityTracker,"announce_url", "server_url",file_path, output_torrent_path, "name", "keywords", "created_by", "127.0.0.1", 9000)
 test.start_seeding()
 # test.stop_seeding()

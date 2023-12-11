@@ -11,10 +11,11 @@ from utils.Port import find_free_port
 from strategies.chokingAlgorithm import SeederHandler
 
 class SeedConnection:
-    def __init__(self, peer_ip, peer_port, piecify, rarity_tracker):
+    def __init__(self, peer_ip, peer_port, piecify,bit_array, rarity_tracker):
         self.peer_ip = peer_ip 
         self.peer_port = peer_port 
         self.piecify = piecify
+        self.bit_array= bit_array
         self.rarity_tracker = rarity_tracker
         # self.socket_dict = {}
         self.connection_close = False
@@ -56,7 +57,7 @@ class SeedConnection:
 
         # print("Accepted connection from leecher on transfer port ", seed_transfer_port)
 
-        SeederHandler(leecher_transfer_socket, self.piecify, self.rarity_tracker , server_socket=seeder_transfer_socket)
+        SeederHandler(leecher_transfer_socket, self.piecify,self.bit_array, self.rarity_tracker , server_socket=seeder_transfer_socket)
         # self.socket_dict[leecher_transfer_socket] = seeder_transfer_socket
         #print("socket dictionary: ", self.socket_dict)
 

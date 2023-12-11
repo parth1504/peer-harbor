@@ -68,6 +68,10 @@ class BitArray:
         self.bit_array = self.generate_bit_array(piece_map, file_path)
         #print("bitarray: ", self.bit_array)
         self.piece_map=piece_map
+        self.have=0
+
+    def is_bit_array_complete(self):
+        return self.have == len(self.bit_array)
 
     def check_offset(self,file_path, offset):
         with open(file_path, 'rb') as file:
@@ -87,6 +91,7 @@ class BitArray:
     def set_bit(self, index):
         if 0 <= index < len(self.bit_array):
             self.bit_array[index] = 1
+            self.have+=1
         else:
             raise ValueError("Index out of range.")
     
