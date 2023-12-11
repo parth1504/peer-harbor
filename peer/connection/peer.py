@@ -8,7 +8,7 @@ project_root = os.path.dirname(os.path.dirname(current_file_path))
 sys.path.append(project_root)
 
 from utils.Port import find_free_port
-from upload.Handler import SeederHandler
+from strategies.chokingAlgorithm import SeederHandler
 
 class SeedConnection:
     def __init__(self, peer_ip, peer_port, piecify, rarity_tracker):
@@ -56,7 +56,7 @@ class SeedConnection:
 
         # print("Accepted connection from leecher on transfer port ", seed_transfer_port)
 
-        SeederHandler(leecher_transfer_socket, seeder_transfer_socket, self.piecify, self.rarity_tracker)
+        SeederHandler(leecher_transfer_socket, self.piecify, self.rarity_tracker , server_socket=seeder_transfer_socket)
         # self.socket_dict[leecher_transfer_socket] = seeder_transfer_socket
         #print("socket dictionary: ", self.socket_dict)
 

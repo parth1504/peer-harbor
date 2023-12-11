@@ -7,16 +7,17 @@ from threading import Thread, Lock
 
 
 class LeecherHandler:
-    def __init__(self, leecher_socket, piecify, rarity_tracker,lock):
+    def __init__(self, leecher_socket, piecify, rarity_tracker, lock, already_seeded = False ):
         # print("In handler")
         self.leecher_socket = leecher_socket
         self.piecify = piecify
         self.rarity_tracker = rarity_tracker
-        self.lock= lock        
+        self.lock = lock  
+        self.already_seeded = already_seeded      
         self.receive_rare_piece()
 
     def receive_rare_piece (self):
-        # print("in receive rare piece")#
+        # print("in receive rare piece")`#
         # print(self.piecify.file_path)#
 
         piece_map=self.piecify.generate_piece_map()
@@ -30,7 +31,9 @@ class LeecherHandler:
         self.lock.release()
         self.piecify.write_piece(index, piece)
         self.rarity_tracker.add_piece(index)
-        SeederHandler(self.leecher_socket, self.piecify, self.rarity_tracker)
+        
+        if not self.already_seeded:
+            SeederHandler(self.leecher_socket, self.piecify, self.rarity_tracker, already_leeched=True)
     
     def send_bit_array(self, socket, bit_array):
         # print("In send bit_array")#

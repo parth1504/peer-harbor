@@ -10,7 +10,6 @@ from connection.peer import SeedConnection
 from Package import TorrentPackage
 from utils.FileManipulation import Piecify, TorrentReader
 from strategies.pieceSelectionAlgorithm import RarityTracker
-from Handler import SeederHandler
 
 '''
 We need to send pieces with their respective indices to the leecher, so we will serialize the indices and data,

@@ -9,7 +9,7 @@ current_file_path = os.path.abspath(__file__)
 project_root = os.path.dirname(os.path.dirname(current_file_path))
 sys.path.append(project_root)
 
-from Handler import LeecherHandler
+from strategies.chokingAlgorithm import LeecherHandler
 from connection.peer import LeechConnection
 from utils.FileManipulation import Piecify, TorrentReader
 from strategies.pieceSelectionAlgorithm import RarityTracker
