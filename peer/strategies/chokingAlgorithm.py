@@ -83,6 +83,7 @@ class SeederHandler:
     def send_sorted_pieces(self):
         sorted_indices = self.sort_indices_by_rarity(self.rarity_tracker)
         #print("In send_sorted_pieces")
+        print(sorted_indices)
         bit_array = self.receive_bit_array(self.client_socket)
         # print(" received bit array:  ", bit_array)
         for index in sorted_indices:

@@ -20,6 +20,7 @@ class Piecify:
         self.piece_map = {}
         self.total_pieces = total_pieces if total_pieces is not None else self.calculate_total_pieces()
         self.lock = threading.Lock()
+        self.generate_piece_map()
 
     def calculate_total_pieces(self):
         file_size = os.path.getsize(self.file_path)
@@ -63,12 +64,14 @@ class Piecify:
             self.piece_map[index] = offset
 
 class BitArray:
-    def __init__(self, piece_map, file_path):
+    def __init__(self, piece_map, file_path,torrent_file):
         # print("initiated bitarray")
-        self.bit_array = self.generate_bit_array(piece_map, file_path)
-        #print("bitarray: ", self.bit_array)
+        self.torrent_file=torrent_file
         self.piece_map=piece_map
         self.have=0
+        self.bit_array = self.generate_bit_array(piece_map, file_path)
+        #print("bitarray: ", self.bit_array)
+        
 
     def is_bit_array_complete(self):
         return self.have == len(self.bit_array)
@@ -79,14 +82,40 @@ class BitArray:
             byte = file.read(1)
             return byte != b''
 
-    def generate_bit_array(self,piece_map, file_path):
-        max_index = max(piece_map.keys(), default=-1)
-        bit_array = [0] * (max_index + 1)
-        for piece_index, offset in piece_map.items():
-            if self.check_offset(file_path, offset):
-                bit_array[piece_index] = 1
+    def generate_bit_array(self, piece_map, file_path):
+        hash_list = []
+        with open(self.torrent_file, 'rb') as file:
+            torrent_data = bencodepy.decode(file.read())
+            pieces = torrent_data[b'info'][b'pieces']
+            piece_length = torrent_data[b'info'][b'piece length']
+            #print(pieces)
+
+        with open(file_path, 'rb') as file:
+            for piece_index, offset in piece_map.items():
+                file.seek(offset)
+                piece_data = file.read(piece_length)
+                hash_list.append(hashlib.sha1(piece_data).hexdigest())
+
+        bit_array = [0] * (len(piece_map) + 1)
+        for i, piece_hash in enumerate(hash_list):
+            #print(piece_hash,"!= ", pieces[i*20:(i+1)*20].hex())
+            if piece_hash ==pieces[i*20:(i+1)*20].hex():
+                bit_array[i] = 1
                 self.have += 1
+        
+        print("number of pieces i have: ", self.have)
+
         return bit_array
+    
+    # def generate_bit_array(self,piece_map, file_path):
+    #     max_index = max(piece_map.keys(), default=-1)
+    #     bit_array = [0] * (max_index + 1)
+    #     for piece_index, offset in piece_map.items():
+    #         if self.check_offset(file_path, offset):
+    #             bit_array[piece_index] = 1
+    #             self.have += 1
+    #     print("bit_array size: ", len(bit_array))
+    #     return bit_array
 
 
     def set_bit(self, index):
@@ -117,6 +146,7 @@ class TorrentReader:
         with open(self.torrent_file_path, 'rb') as file:
             torrent_data = bencodepy.decode(file.read())
             pieces = torrent_data[b'info'][b'pieces']
+           # print(pieces)
             total_pieces = len(pieces) // 20
             return total_pieces
         
@@ -140,4 +170,4 @@ class TorrentReader:
 def calculate_piece_length(file_size):
     return max(16384, 1 << int(math.log2(1 if file_size < 1024 else file_size / 1024) + 0.5))
 
-# temp= TorrentReader("D:/backend/p2p/peer-harbor/peer/Mahabharat.torrent")
+temp= TorrentReader("D:/backend/p2p/peer-harbor/peer/upload/Mahabharat.torrent")

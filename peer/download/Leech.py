@@ -68,11 +68,13 @@ class Leech:
 
 announce_url = "http://127.0.0.1:6969/get_peers"
 info_hash = "random_info_hash"
-saved_torrent_path = "./upload/Mahabharat.torrent"
-download_file_path = "./download/result.pdf"
+saved_torrent_path = "D:/backend/p2p/peer-harbor/peer/upload/Mahabharat.torrent"
+download_file_path = "D:/backend/p2p/peer-harbor/peer/upload/SH.pdf"
 torrent = TorrentReader(saved_torrent_path)
 file = Piecify(download_file_path, torrent.calculate_piece_length(), torrent.calculate_total_pieces())
-bit_array = BitArray( file.generate_piece_map(), download_file_path)
+bit_array = BitArray( file.generate_piece_map(), download_file_path, saved_torrent_path)
+
+print(bit_array.bit_array)
 
 if not bit_array.is_bit_array_complete():
     file_rarity = RarityTracker(len(file.generate_piece_map()))  
