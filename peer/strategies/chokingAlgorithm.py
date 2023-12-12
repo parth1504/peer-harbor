@@ -114,9 +114,9 @@ class LeecherHandler:
         self.send_bit_array(self.leecher_socket, self.bit_array.bit_array)
         index, piece = self.receive_piece(self.leecher_socket)
         self.bit_array.set_bit(index)    
-        self.lock.release()
         self.piecify.write_piece(index, piece)
         self.rarity_tracker.add_piece(index)
+        self.lock.release()
         
         if not self.already_seeded:
             SeederHandler(self.leecher_socket, self.piecify, self.rarity_tracker, already_leeched=True)
@@ -132,12 +132,18 @@ class LeecherHandler:
         if not socket:
             raise ValueError("Socket not connected")
 
+        socket.settimeout(15)
+
         received_data = b''
         buffer_size = 4096
 
         while True:
-            data = socket.recv(buffer_size)
-
+            
+            try:
+                data = socket.recv(buffer_size)
+            except socket.timeout:
+                print("No data received for 15 seconds. Closing the connection.")
+                break
             if not data:
                 break
 
