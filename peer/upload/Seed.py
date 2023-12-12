@@ -17,10 +17,7 @@ calculate the SHA1 hash of pieces and append it to the data and send this to the
 '''
 
 class Seed:
-    def __init__ (self, piecify,bit_array, rarity_tracker, announce_url, server_url, file_path, output_torrent_path, name, keywords, created_by, seeder_ip, seeder_port):
-        self.piecify = piecify
-        self.bit_array=bit_array
-        self.rarity_tracker = rarity_tracker
+    def __init__ (self, announce_url, server_url, file_path, output_torrent_path, name, keywords, created_by, seeder_ip, seeder_port):
         self.announce_url = announce_url
         self.server_url = server_url
         self.file_path = file_path
@@ -30,14 +27,19 @@ class Seed:
         self.created_by = created_by
         self.seeder_ip = seeder_ip
         self.seeder_port = seeder_port
-        self.peerInstance = SeedConnection(self.seeder_ip, self.seeder_port, piecify,bit_array, rarity_tracker)
         self.torrentReader= TorrentReader(output_torrent_path)
+        self.package_and_publish()
         
     def package_and_publish (self):
         torrent_package = TorrentPackage(self.announce_url, self.server_url, self.file_path, self.output_torrent_path)
-        torrent_package.upload_torrent_to_server(self.output_torrent_path, self.name, self.keywords, self.created_by)
-        info_hash = self.torrentReader.calculate_info_hash(self.output_torrent_path)
-        torrent_package.announce_to_tracker(info_hash)
+        # torrent_package.upload_torrent_to_server(self.output_torrent_path, self.name, self.keywords, self.created_by)
+        # info_hash = self.torrentReader.calculate_info_hash(self.output_torrent_path)
+        # torrent_package.announce_to_tracker(info_hash)
+        self.piecify = Piecify(self.file_path, self.torrentReader.calculate_piece_length(), self.torrentReader.calculate_total_pieces())
+        self.bit_array= BitArray(self.piecify.piece_map, self.file_path, self.output_torrent_path)
+        print(self.bit_array.bit_array)
+        self.rarity_tracker = RarityTracker(self.piecify.total_pieces)
+        self.peerInstance = SeedConnection(self.seeder_ip, self.seeder_port, self.piecify, self.bit_array, self.rarity_tracker)
     
     def start_seeding (self):
         self.peerInstance.startup_seed_connection()
@@ -45,14 +47,10 @@ class Seed:
     def stop_seeding (self):
         self.peerInstance.close_seed_connection()
 
-file_path="./upload/Mahabharat.pdf"
+file_path="./upload/result.pdf"
 output_torrent_path="./upload/Mahabharat.torrent"
 saved_torrent_path="./upload/Mahabharat.torrent"     
 torrent_reader = TorrentReader(saved_torrent_path)
-file = Piecify(file_path)
-bit_array= BitArray(file.piece_map,file_path, saved_torrent_path)
-print(bit_array.bit_array)
-RarityTracker = RarityTracker(file.total_pieces)
-test = Seed(file,bit_array,RarityTracker,"announce_url", "server_url",file_path, output_torrent_path, "name", "keywords", "created_by", "127.0.0.1", 8000)
+test = Seed("announce_url", "server_url",file_path, output_torrent_path, "name", "keywords", "created_by", "127.0.0.1", 9000)
 test.start_seeding()
 # test.stop_seeding()

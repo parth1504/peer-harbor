@@ -45,7 +45,7 @@ class SeedConnection:
         seeder_transfer_socket.bind((self.peer_ip, seed_transfer_port))
         seeder_transfer_socket.listen(1)
         leecher_transfer_socket, _ = seeder_transfer_socket.accept()
-        SeederHandler(leecher_transfer_socket, self.piecify,self.bit_array, self.rarity_tracker , server_socket=seeder_transfer_socket)
+        SeederHandler(leecher_transfer_socket, self.piecify, self.bit_array, self.rarity_tracker , server_socket=seeder_transfer_socket)
         
 class LeechConnection:
     def __init__(self, peer_ip, peer_port):

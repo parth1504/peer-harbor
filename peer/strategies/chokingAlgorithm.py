@@ -25,7 +25,6 @@ class PeerSelection:
             print(f"Error details: {response.text}")
             return None
         
-        
 class SeederHandler:
     def __init__ (self, client_socket , piecify, bit_array, rarity_tracker, server_socket=None, already_leeched = False):
         self.client_socket = client_socket
@@ -55,7 +54,6 @@ class SeederHandler:
             return None
 
         bit_array = list(map(int, bit_array_bytes))
-
         return bit_array
     
     def send_sorted_pieces(self):
@@ -71,7 +69,7 @@ class SeederHandler:
             
             if not self.already_leeched and not self.bit_array.is_bit_array_complete():
                 lock = Lock()
-                LeecherHandler(self.client_socket, self.piecify,self.bit_array, self.rarity_tracker, lock, already_seeded=True)
+                LeecherHandler(self.client_socket, self.piecify, self.bit_array, self.rarity_tracker, lock, already_seeded=True)
             
             self.client_socket.close()
             if self.server_socket:
@@ -94,19 +92,18 @@ class SeederHandler:
 
         serialized_data = serialized_index + serialized_piece
         socket.sendall(serialized_data)
-        print("sent index ", index)#
-        socket.sendall(b'')
+        # print("Sent Index: ", index)
+        socket.sendall(b'TERMINATE')
         
 
 class LeecherHandler:
     def __init__(self, leecher_socket, piecify, bit_array, rarity_tracker, lock, already_seeded = False ):
-        # print("In handler")
         self.leecher_socket = leecher_socket
         self.piecify = piecify
         self.rarity_tracker = rarity_tracker
         self.lock = lock  
         self.already_seeded = already_seeded  
-        self.bit_array= bit_array    
+        self.bit_array= bit_array   
         self.receive_rare_piece()
 
     def receive_rare_piece (self):
@@ -117,9 +114,9 @@ class LeecherHandler:
         self.piecify.write_piece(index, piece)
         self.rarity_tracker.add_piece(index)
         self.lock.release()
-        
+
         if not self.already_seeded:
-            SeederHandler(self.leecher_socket, self.piecify, self.rarity_tracker, already_leeched=True)
+            SeederHandler(self.leecher_socket, self.piecify, self.bit_array, self.rarity_tracker, already_leeched=True)
     
     def send_bit_array(self, socket, bit_array):
         bit_bytes = bytes(bit_array)
@@ -132,18 +129,12 @@ class LeecherHandler:
         if not socket:
             raise ValueError("Socket not connected")
 
-        socket.settimeout(15)
-
         received_data = b''
         buffer_size = 4096
 
         while True:
+            data = socket.recv(buffer_size)
             
-            try:
-                data = socket.recv(buffer_size)
-            except socket.timeout:
-                print("No data received for 15 seconds. Closing the connection.")
-                break
             if not data:
                 break
 
@@ -158,7 +149,6 @@ class LeecherHandler:
             header_format = '!Q'
             header_size = struct.calcsize(header_format)
             index_value = struct.unpack(header_format, received_data[:header_size])[0]
-            print("Received index:",index_value)
             remaining_data_size = len(received_data) - header_size
             if remaining_data_size < piece_size:
                 piece_data_format = f'!{remaining_data_size}s'
@@ -170,4 +160,5 @@ class LeecherHandler:
 
             received_data = received_data[header_size + piece_size:]
 
+        print("Received index: ", index_value)
         return index_value, piece_data[0]
