@@ -1,8 +1,5 @@
 import os
 import sys
-import requests
-import threading
-import time
 import concurrent.futures
 
 current_file_path = os.path.abspath(__file__)
@@ -14,7 +11,7 @@ from connection.peer import LeechConnection
 from utils.FileManipulation import Piecify, TorrentReader, BitArray
 from strategies.pieceSelectionAlgorithm import RarityTracker
 from strategies.chokingAlgorithm import PeerSelection
-from threading import Thread, Lock
+from threading import Lock
 
 
 '''
@@ -43,33 +40,20 @@ class Leech:
 
             for peer in peers:
                 self.executor.submit(self.start_leeching, peer['ip'], peer['port'], lock)
-                # thread = threading.Thread(target=self.start_leeching, args=(peer['ip'], peer['port']))
-                # thread.start()
-                # self.threads.append(thread)
-                #time.sleep(0.1)
 
     def start_leeching(self, peer_ip, peer_port,lock):
         peer_instance = LeechConnection(peer_ip, peer_port)
         peer_instance.startup_leech_connection()
-        # print(peer_instance.leecher_transfer_socket)
         LeecherHandler(peer_instance.leecher_transfer_socket, self.piecify, self.bit_array, self.rarity_tracker, lock)
 
     def stop_leeching(self):
         self.is_running = False
         self.executor.shutdown(wait=True)
 
-
-    # def stop_leeching(self):
-    #     self.is_running = False
-
-    #     for thread in self.threads:
-    #         thread.join()
-
-
 announce_url = "http://127.0.0.1:6969/get_peers"
 info_hash = "random_info_hash"
-saved_torrent_path = "D:/backend/p2p/peer-harbor/peer/upload/Mahabharat.torrent"
-download_file_path = "D:/backend/p2p/peer-harbor/peer/upload/SH.pdf"
+saved_torrent_path = "./upload/Mahabharat.torrent"
+download_file_path = "./upload/copy.pdf"
 torrent = TorrentReader(saved_torrent_path)
 file = Piecify(download_file_path, torrent.calculate_piece_length(), torrent.calculate_total_pieces())
 bit_array = BitArray( file.generate_piece_map(), download_file_path, saved_torrent_path)

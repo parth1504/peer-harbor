@@ -1,6 +1,4 @@
-import hashlib
-import json,os,socket,sys,time
-import struct
+import os,sys
 
 from utils.FileManipulation import Piecify
 

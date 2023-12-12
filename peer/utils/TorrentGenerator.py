@@ -38,13 +38,7 @@ class TorrentGenerator:
 
 if __name__ == "__main__":
     announce_url = "http://your.tracker/announce"
-
-    # Create an instance of TorrentGenerator
     torrent_generator = TorrentGenerator(announce_url)
-
-    # Get file path input from the user
     file_path = input("Enter the file path: ").strip()
-
-    # Call the method to generate and save the torrent file
     torrent_generator.generate_and_save_torrent(file_path)
 

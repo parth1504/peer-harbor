@@ -38,17 +38,14 @@ class Piecify:
 
     def read_piece(self, index):
         with self.lock:
-            # print("reading index: ", index)
             if len(self.piece_map) == 0:
                 self.generate_piece_map()
-            #print("piece map: ", self.piece_map)
             offset = self.piece_map.get(index)
             
             if offset is not None:
                 with open(self.file_path, 'rb') as file:
                     file.seek(offset)
                     data = file.read(self.piece_size)
-                    #print("data read: ", data)
                     return data
             else:
                 return None
@@ -65,58 +62,54 @@ class Piecify:
 
 class BitArray:
     def __init__(self, piece_map, file_path,torrent_file):
-        # print("initiated bitarray")
         self.torrent_file=torrent_file
         self.piece_map=piece_map
         self.have=0
         self.bit_array = self.generate_bit_array(piece_map, file_path)
-        #print("bitarray: ", self.bit_array)
         
-
     def is_bit_array_complete(self):
         return self.have == len(self.bit_array)
 
-    def check_offset(self,file_path, offset):
+    def check_offset(self, file_path, offset):
         with open(file_path, 'rb') as file:
             file.seek(offset)
             byte = file.read(1)
             return byte != b''
-
+    
     def generate_bit_array(self, piece_map, file_path):
         hash_list = []
         with open(self.torrent_file, 'rb') as file:
             torrent_data = bencodepy.decode(file.read())
             pieces = torrent_data[b'info'][b'pieces']
+            total_pieces = len(pieces) // 20
             piece_length = torrent_data[b'info'][b'piece length']
-            #print(pieces)
+            file_size = torrent_data[b'info'][b'length']
 
         with open(file_path, 'rb') as file:
+            hash_list = []
             for piece_index, offset in piece_map.items():
                 file.seek(offset)
-                piece_data = file.read(piece_length)
-                hash_list.append(hashlib.sha1(piece_data).hexdigest())
+                remaining_length = calculate_remaining_length(file_size, piece_length, offset)
+                print(piece_length, "---", remaining_length)
+                piece_data = file.read(remaining_length)
+                hash_object = hashlib.sha1(piece_data)
+                piece_hash = hash_object.hexdigest()
+                hash_list.append(piece_hash)
 
-        bit_array = [0] * (len(piece_map) + 1)
+        bit_array = [0] * (len(piece_map))
         for i, piece_hash in enumerate(hash_list):
-            #print(piece_hash,"!= ", pieces[i*20:(i+1)*20].hex())
-            if piece_hash ==pieces[i*20:(i+1)*20].hex():
+            print(piece_hash,"!= ", pieces[i*20:(i+1)*20].hex())
+            if piece_hash == pieces[i*20:(i+1)*20].hex(): 
+                bit_array[i] = 1
+                self.have += 1
+                
+            if i==total_pieces-1 and self.check_offset(file_path, piece_map[i]):
                 bit_array[i] = 1
                 self.have += 1
         
         print("number of pieces i have: ", self.have)
 
         return bit_array
-    
-    # def generate_bit_array(self,piece_map, file_path):
-    #     max_index = max(piece_map.keys(), default=-1)
-    #     bit_array = [0] * (max_index + 1)
-    #     for piece_index, offset in piece_map.items():
-    #         if self.check_offset(file_path, offset):
-    #             bit_array[piece_index] = 1
-    #             self.have += 1
-    #     print("bit_array size: ", len(bit_array))
-    #     return bit_array
-
 
     def set_bit(self, index):
         if 0 <= index < len(self.bit_array):
@@ -146,19 +139,16 @@ class TorrentReader:
         with open(self.torrent_file_path, 'rb') as file:
             torrent_data = bencodepy.decode(file.read())
             pieces = torrent_data[b'info'][b'pieces']
-           # print(pieces)
             total_pieces = len(pieces) // 20
             return total_pieces
         
     def calculate_info_hash(self):
         with open(self.torrent_file_path, 'rb') as file:
-            # print(self.torrent_file_path)
             torrent_data = bencodepy.decode(file.read())
             info_dict = torrent_data[b'info']
             info_bytes = bencodepy.encode(info_dict)
             info_hash = hashlib.sha1(info_bytes).digest()
             info_hash_hex = info_hash.hex()
-            # print(info_hash_hex)
             return info_hash_hex
         
     def calculate_piece_length(self):
@@ -170,4 +160,8 @@ class TorrentReader:
 def calculate_piece_length(file_size):
     return max(16384, 1 << int(math.log2(1 if file_size < 1024 else file_size / 1024) + 0.5))
 
-temp= TorrentReader("D:/backend/p2p/peer-harbor/peer/upload/Mahabharat.torrent")
+def calculate_remaining_length(file_size, piece_size, offset):
+    remaining_length = file_size - offset
+    return min(remaining_length, piece_size)
+
+temp= TorrentReader("./upload/Mahabharat.torrent")

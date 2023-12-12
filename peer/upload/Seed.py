@@ -40,22 +40,16 @@ class Seed:
         torrent_package.announce_to_tracker(info_hash)
     
     def start_seeding (self):
-        # print("In start seeding")
         self.peerInstance.startup_seed_connection()
-        #self.SeederSocketList = self.peerInstance.socket_dict
-        #print("socket dictionry: ", self.peerInstance.socket_dict)
-        # SeederHandler(self.peerInstance, self.piecify, self.rarity_tracker)
 
     def stop_seeding (self):
         self.peerInstance.close_seed_connection()
 
-file_path="D:/backend/p2p/peer-harbor/peer/upload/Mahabharat.pdf"
-output_torrent_path="D:/backend/p2p/peer-harbor/peer/upload/Mahabharat.torrent"
-saved_torrent_path="D:/backend/p2p/peer-harbor/peer/upload/Mahabharat.torrent"     
+file_path="./upload/Mahabharat.pdf"
+output_torrent_path="./upload/Mahabharat.torrent"
+saved_torrent_path="./upload/Mahabharat.torrent"     
 torrent_reader = TorrentReader(saved_torrent_path)
 file = Piecify(file_path)
-print(file.piece_map)
-
 bit_array= BitArray(file.piece_map,file_path, saved_torrent_path)
 print(bit_array.bit_array)
 RarityTracker = RarityTracker(file.total_pieces)

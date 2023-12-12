@@ -9,33 +9,23 @@ class TorrentPackage:
         self.server_url = server_url
         self.file_path = file_path
         self.output_torrent_path = output_torrent_path
-        # Create the torrent file
         torrent_file_path = TorrentGenerator(self.announce_url, file_path, output_torrent_path)
 
     def upload_torrent_to_server(self, torrent_file_path, name, keywords, created_by):
-        # print(torrent_file_path)
-    # Read the torrent file as binary data
         with open(torrent_file_path, 'rb') as file:
             torrent_file_data = file.read()
 
-        # Encode the torrent file data as base64
         torrent_file_base64 = base64.b64encode(torrent_file_data).decode('utf-8')
 
-        # Prepare the files to include the torrent file
         files = {
             'name': (None, name),
-            'keywords': (None, ','.join(keywords)),  # Assuming keywords should be joined with commas only
+            'keywords': (None, ','.join(keywords)),  
             'createdBy': (None, created_by),
-            'torrentFile': ('torrentFile', torrent_file_base64)  # Specify the file name as 'torrentFile'
+            'torrentFile': ('torrentFile', torrent_file_base64)  
         }
 
-        # Print the constructed files dictionary
-        # print(files)
-
-        # Make the HTTP POST request to the server
         response = requests.post(self.server_url, files=files)
 
-        # Check the response status
         if response.status_code == 200 or response.status_code == 201 :
             print(f"Torrent file {torrent_file_path} uploaded successfully to server: {self.server_url}")
         else:
@@ -52,7 +42,6 @@ class TorrentPackage:
         downloaded = 0  # Replace with the actual downloaded amount
         left = 0  # Replace with the actual amount left
 
-        # Make the announce request
         params = {
             'info_hash': info_hash,
             'peer_id': peer_id,
