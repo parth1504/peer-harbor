@@ -92,7 +92,7 @@ class SeederHandler:
 
         serialized_data = serialized_index + serialized_piece
         socket.sendall(serialized_data)
-        # print("Sent Index: ", index)
+        print("Sent Index: ", index)
         socket.sendall(b'TERMINATE')
         
 

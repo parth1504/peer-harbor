@@ -17,8 +17,8 @@ class Piecify:
                 pass
         self.file_path = file_path
         self.piece_size = piece_size
-        self.piece_map = {}
         self.total_pieces = total_pieces 
+        self.piece_map = {i: None for i in range(total_pieces)}
         self.lock = threading.Lock()
         self.generate_piece_map()
 
