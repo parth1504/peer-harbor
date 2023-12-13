@@ -30,10 +30,11 @@ class Seed:
         self.package_and_publish()
         
     def package_and_publish (self):
-        # torrent_package = TorrentPackage(self.announce_url, self.server_url, self.file_path, self.output_torrent_path)
-        # torrent_package.upload_torrent_to_server(self.output_torrent_path, self.name, self.keywords, self.created_by)
-        # info_hash = self.torrentReader.calculate_info_hash(self.output_torrent_path)
-        # torrent_package.announce_to_tracker(info_hash)
+        if not self.output_torrent_path:
+            torrent_package = TorrentPackage(self.announce_url, self.server_url, self.file_path, self.output_torrent_path)
+            torrent_package.upload_torrent_to_server(self.output_torrent_path, self.name, self.keywords, self.created_by)
+            info_hash = self.torrentReader.calculate_info_hash(self.output_torrent_path)
+            torrent_package.announce_to_tracker(info_hash)
         self.torrentReader = TorrentReader(output_torrent_path)
         self.piecify = Piecify(self.file_path, self.torrentReader.calculate_piece_length(), self.torrentReader.calculate_total_pieces())
         self.bit_array= BitArray(self.piecify.piece_map, self.file_path, self.output_torrent_path)
