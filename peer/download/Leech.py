@@ -1,18 +1,16 @@
-import os
-import sys
-import concurrent.futures
-
 current_file_path = os.path.abspath(__file__)
 project_root = os.path.dirname(os.path.dirname(current_file_path))
 sys.path.append(project_root)
 
+import os
+import sys
+import concurrent.futures
 from strategies.chokingAlgorithm import LeecherHandler
 from connection.peer import LeechConnection
 from utils.FileManipulation import Piecify, TorrentReader, BitArray
 from strategies.pieceSelectionAlgorithm import RarityTracker
 from strategies.chokingAlgorithm import PeerSelection
 from threading import Lock
-
 
 '''
 This function will be used by the leecher in order to receive pieces from the socket, It will keep on receiving data until it comes
@@ -22,11 +20,12 @@ and hash values on the receiver side andcalculate and compare the SHA1 hash will
 '''
 
 class Leech:
-    def __init__ (self, piecify, bit_array, rarity_tracker, announce_url, info_hash, download_file_path):
+    def __init__ (self, piecify, bit_array, rarity_tracker, torrent_reader, announce_url):
         self.piecify = piecify
         self.rarity_tracker = rarity_tracker
+        self.torrent = torrent_reader
         self.announce_url = announce_url
-        self.info_hash = info_hash
+        self.info_hash = torrent_reader.calculate_info_hash()
         self.is_running = True 
         self.bit_array=bit_array
         self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
@@ -50,16 +49,15 @@ class Leech:
         self.is_running = False
         self.executor.shutdown(wait=True)
 
-announce_url = "http://127.0.0.1:6969/get_peers"
-info_hash = "random_info_hash"
-saved_torrent_path = "./upload/Mahabharat.torrent"
+
 download_file_path = "./upload/FH.pdf"
+saved_torrent_path = "./upload/Mahabharat.torrent"
+
 torrent = TorrentReader(saved_torrent_path)
-file = Piecify(download_file_path, torrent.calculate_piece_length(), torrent.calculate_total_pieces())
-bit_array = BitArray( file.generate_piece_map(), download_file_path, saved_torrent_path)
+piecify = Piecify(download_file_path, torrent.calculate_piece_length(), torrent.calculate_total_pieces())
+bit_array = BitArray( piecify.generate_piece_map(), download_file_path, saved_torrent_path)
 
 if not bit_array.is_bit_array_complete():
-    file_rarity = RarityTracker(len(file.generate_piece_map()))  
-    test = Leech(file, bit_array, file_rarity, announce_url, info_hash,"temp")
+    file_rarity = RarityTracker(len(piecify.generate_piece_map()))  
+    test = Leech(piecify, bit_array, file_rarity, torrent, torrent.get_announce_url())
     test.setup_leeching()
-# print(test.LeecherSocket)

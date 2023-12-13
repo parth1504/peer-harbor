@@ -2,54 +2,53 @@ import base64
 import os
 import requests
 from utils.TorrentGenerator import TorrentGenerator
+from utils.FileManipulation import TorrentReader
 
 class TorrentPackage:
-    def __init__(self, announce_url, server_url, file_path, output_torrent_path):
-        self.announce_url = announce_url
-        self.server_url = server_url
+    def __init__(self, file_path, output_torrent_path, name, keywords, created_by, announce_url, server_url, peer_ip, peer_port):
         self.file_path = file_path
         self.output_torrent_path = output_torrent_path
-        torrent_file_path = TorrentGenerator(self.announce_url, file_path, output_torrent_path)
+        
+        self.name = name
+        self.keywords = keywords
+        self.created_by = created_by
+        
+        self.announce_url = announce_url
+        self.server_url = server_url
+        self.peer_ip = peer_ip  
+        self.peer_port = peer_port
+        
+        torrent_file = TorrentGenerator(self.announce_url, file_path, output_torrent_path)
+        torrentReader = TorrentReader(output_torrent_path)
+        self.info_hash = torrentReader.calculate_info_hash() 
+        self.upload_torrent_to_server()
 
-    def upload_torrent_to_server(self, torrent_file_path, name, keywords, created_by):
-        with open(torrent_file_path, 'rb') as file:
+    def upload_torrent_to_server(self):
+        with open(self.output_torrent_path, 'rb') as file:
             torrent_file_data = file.read()
 
         torrent_file_base64 = base64.b64encode(torrent_file_data).decode('utf-8')
 
         files = {
-            'name': (None, name),
-            'keywords': (None, ','.join(keywords)),  
-            'createdBy': (None, created_by),
+            'name': (None, self.name),
+            'keywords': (None, ','.join(self.keywords)),  
+            'createdBy': (None, self.created_by),
             'torrentFile': ('torrentFile', torrent_file_base64)  
         }
 
         response = requests.post(self.server_url, files=files)
 
         if response.status_code == 200 or response.status_code == 201 :
-            print(f"Torrent file {torrent_file_path} uploaded successfully to server: {self.server_url}")
+            print(f"Torrent file {self.output_torrent_path} uploaded successfully to server: {self.server_url}")
         else:
-            print(f"Error uploading torrent file {torrent_file_path} to server. Status Code: {response.status_code}")
+            print(f"Error uploading torrent file {self.output_torrent_path} to server. Status Code: {response.status_code}")
             print(f"Error details: {response.text}")
 
-    def announce_to_tracker(self, info_hash):
-        # Get parameters for the announce request
-        info_hash = info_hash  # Replace with the actual info_hash
-        peer_id = "your_peer_id"  # Replace with the actual peer_id
-        ip = "yourip2"  # Replace with the actual IP
-        port = 123455  # Replace with the actual port
-        uploaded = 0  # Replace with the actual uploaded amount
-        downloaded = 0  # Replace with the actual downloaded amount
-        left = 0  # Replace with the actual amount left
-
+    def announce_to_tracker(self):
         params = {
-            'info_hash': info_hash,
-            'peer_id': peer_id,
-            'ip': ip,
-            'port': port,
-            'uploaded': uploaded,
-            'downloaded': downloaded,
-            'left': left,
+            'info_hash': self.info_hash,
+            'ip': self.peer_ip,
+            'port': self.peer_port
         }
 
         response = requests.get(self.announce_url, params=params)

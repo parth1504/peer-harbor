@@ -10,14 +10,14 @@ piece in the file. We also have read and write functions in this class where we 
 '''
 
 class Piecify:
-    def __init__(self, file_path, piece_size, total_pieces):
+    def __init__(self, file_path, piece_size = None, total_pieces = None):
         file_exists = os.path.exists(file_path)
         if not file_exists:
             with open(file_path, 'wb'):
                 pass
         self.file_path = file_path
-        self.piece_size = piece_size
-        self.total_pieces = total_pieces 
+        self.piece_size = piece_size if piece_size is not None else calculate_piece_length(os.path.getsize(self.file_path))
+        self.total_pieces = total_pieces if total_pieces is not None else self.calculate_total_pieces() 
         self.piece_map = {i: None for i in range(total_pieces)}
         self.lock = threading.Lock()
         self.generate_piece_map()
@@ -140,6 +140,15 @@ class TorrentReader:
             torrent_data = bencodepy.decode(file.read())
             piece_length = torrent_data[b'info'][b'piece length']
             return piece_length
+        
+    def get_announce_url(self):
+        with open(self.torrent_file_path, 'rb') as torrent_file:
+            torrent_data = bencodepy.decode(torrent_file.read())
+        announce_list = torrent_data.get('announce-list', [])
+        if not announce_list:
+            announce_list = [torrent_data.get('announce')]
+
+        return announce_list
         
 def calculate_piece_length(file_size):
     return max(16384, 1 << int(math.log2(1 if file_size < 1024 else file_size / 1024) + 0.5))

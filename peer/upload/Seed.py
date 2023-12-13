@@ -17,28 +17,16 @@ calculate the SHA1 hash of pieces and append it to the data and send this to the
 '''
 
 class Seed:
-    def __init__ (self, announce_url, server_url, file_path, output_torrent_path, name, keywords, created_by, seeder_ip, seeder_port):
-        self.announce_url = announce_url
-        self.server_url = server_url
-        self.file_path = file_path
-        self.output_torrent_path = output_torrent_path
-        self.name = name
-        self.keywords = keywords
-        self.created_by = created_by
+    def __init__ (self, seeder_ip, seeder_port, piecify, bit_array, rarity_tracker, output_torrent_path):
         self.seeder_ip = seeder_ip
         self.seeder_port = seeder_port
+        self.piecify = piecify
+        self.bit_array = bit_array
+        self.rarity_tracker = rarity_tracker
+        self.output_torrent_path = output_torrent_path
         self.package_and_publish()
         
     def package_and_publish (self):
-        if not self.output_torrent_path:
-            torrent_package = TorrentPackage(self.announce_url, self.server_url, self.file_path, self.output_torrent_path)
-            torrent_package.upload_torrent_to_server(self.output_torrent_path, self.name, self.keywords, self.created_by)
-            info_hash = self.torrentReader.calculate_info_hash(self.output_torrent_path)
-            torrent_package.announce_to_tracker(info_hash)
-        self.torrentReader = TorrentReader(output_torrent_path)
-        self.piecify = Piecify(self.file_path, self.torrentReader.calculate_piece_length(), self.torrentReader.calculate_total_pieces())
-        self.bit_array= BitArray(self.piecify.piece_map, self.file_path, self.output_torrent_path)
-        self.rarity_tracker = RarityTracker(self.piecify.total_pieces)
         self.peerInstance = SeedConnection(self.seeder_ip, self.seeder_port, self.piecify, self.bit_array, self.rarity_tracker)
     
     def start_seeding (self):
@@ -47,10 +35,37 @@ class Seed:
     def stop_seeding (self):
         self.peerInstance.close_seed_connection()
 
-file_path="./upload/SH.pdf"
-output_torrent_path="./upload/Mahabharat.torrent"
-saved_torrent_path="./upload/Mahabharat.torrent"     
-torrent_reader = TorrentReader(saved_torrent_path)
-test = Seed("announce_url", "server_url",file_path, output_torrent_path, "name", "keywords", "created_by", "127.0.0.1", 9000)
-test.start_seeding()
-# test.stop_seeding()
+if __name__ == "__main__":
+    seeder_ip = input("Enter seeder IP: ")
+    seeder_port = int(input("Enter seeder port: "))    
+    output_torrent_path = input("Enter output torrent path: ")
+    file_path = input("Enter file path: ")
+    
+    if os.path.exists(output_torrent_path):
+        torrentReader = TorrentReader(output_torrent_path)
+        piecify = Piecify(file_path, torrentReader.calculate_piece_length(), torrentReader.calculate_total_pieces())
+    else:
+        name = input("Enter name: ")
+        keywords = input("Enter keywords: ")
+        created_by = input("Enter created by: ")
+        announce_url = input("Enter announce URL: ")
+        server_url = input("Enter server URL: ")
+        torrent_package = TorrentPackage(file_path, output_torrent_path, name, keywords, created_by, announce_url, server_url, seeder_ip, seeder_port)
+        piecify = Piecify(file_path)
+        
+    bit_array = BitArray(piecify.piece_map, file_path, output_torrent_path)
+    rarity_tracker = RarityTracker(piecify.total_pieces)
+    seed_instance = Seed(seeder_ip, seeder_port, piecify, bit_array, rarity_tracker, output_torrent_path)
+    
+
+    while True:
+        action = input("Enter 'start' to start seeding, 'pause' to stop seeding, or 'exit' to exit: ")
+        
+        if action == "start":
+            seed_instance.start_seeding()
+        elif action == "pause":
+            seed_instance.stop_seeding()
+        elif action == "exit":
+            break
+        else:
+            print("Invalid command. Try again.")
