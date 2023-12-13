@@ -131,7 +131,7 @@ class LeecherHandler:
 
         received_data = b''
         buffer_size = 4096
-
+        index_value= None
         while True:
             data = socket.recv(buffer_size)
             

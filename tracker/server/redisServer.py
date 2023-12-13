@@ -50,17 +50,12 @@ class RedisInstance:
         self.r.srem(infohash, peer_data)
 
     def get_peers(self, infohash):
-        # Get all peers in the set corresponding to the 
-        print("In get peers")
-
         set_members = self.r.smembers(infohash)
         decoded_data = [pickle.loads(base64.b64decode(member)) for member in set_members]
         return decoded_data
 
         
     def key_exists(self, key):
-        # Check if the key exists in Redis
-        print("in key exists")
         return self.r.exists(key)
 
 

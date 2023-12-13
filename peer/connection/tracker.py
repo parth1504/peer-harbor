@@ -8,13 +8,19 @@ server_address = "http://127.0.0.1:6969"
 UDP_IP = "127.0.0.1"
 UDP_PORT = 5005
 
-rarity_arrays={}
+rarity_arrays = {
+    "random_info_hash": [[1,1,1,1,5],[2,1,4,5,6],[1,4,5,1,7]],
+}
+
 # Function to periodically send info_hash to the server
 def send_rarity_array_periodically(info_hash):
     while True:
+
         time.sleep(15)  # 15 minutes interval
         try:
-            requests.post(f"{server_address}/send_info_hash", json={"rarity_array": rarity_arrays[info_hash]})
+            for array in rarity_arrays[info_hash]:
+                print("sent")
+                requests.post(f"{server_address}/send_info_hash", json={"info_hash":info_hash ,"rarity_array": array})
         except requests.RequestException as e:
             print(f"Error sending info_hash to server: {e}")
 
@@ -31,7 +37,7 @@ def receive_udp_messages():
                 print(f"Error receiving UDP message: {e}")
 
 # Replace 'your_info_hash' with the actual info_hash for each peer
-send_info_hash_thread = threading.Thread(target=send_rarity_array_periodically, args=('your_info_hash',), daemon=True)
+send_info_hash_thread = threading.Thread(target=send_rarity_array_periodically, args=('random_info_hash',), daemon=True)
 send_info_hash_thread.start()
 
 udp_receive_thread = threading.Thread(target=receive_udp_messages, daemon=True)

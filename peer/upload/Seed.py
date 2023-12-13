@@ -47,9 +47,9 @@ class Seed:
     def stop_seeding (self):
         self.peerInstance.close_seed_connection()
 
-file_path="./upload/SH.pdf"
-output_torrent_path="./upload/Mahabharat.torrent"
-saved_torrent_path="./upload/Mahabharat.torrent"     
+file_path="D:/backend/p2p/peer-harbor/peer/upload/SH.pdf"
+output_torrent_path="D:/backend/p2p/peer-harbor/peer/upload/Mahabharat.torrent"
+saved_torrent_path="D:/backend/p2p/peer-harbor/peer/upload/Mahabharat.torrent"     
 torrent_reader = TorrentReader(saved_torrent_path)
 test = Seed("announce_url", "server_url",file_path, output_torrent_path, "name", "keywords", "created_by", "127.0.0.1", 9000)
 test.start_seeding()
