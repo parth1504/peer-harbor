@@ -18,7 +18,7 @@ torrents = {}
 
 @bp.route('/announce', methods=['GET'])
 def announce():
-    print("req received")
+    #print("req received")
     info_hash = request.args.get('info_hash')
     ip = request.args.get('ip')
     port = int(request.args.get('port'))
@@ -33,8 +33,8 @@ def announce():
         print("info_hash not found in Redis.")
     
     peers = redis_client.get_peers(info_hash)
-    print("out")
-    print(peers)
+    #print("out")
+    #print(peers)
 
     # Update the peer information or add a new peer
     peer_data = {
@@ -60,7 +60,7 @@ def announce():
         peers.append(frozenset(peer_data.items()))
         redis_client.add_peer(info_hash,peer_data)
     
-    print("gay")
+    #print("gay")
     peers_list = [dict(peer_set) for peer_set in peers]
 
 
@@ -110,19 +110,3 @@ def get_peers():
         return jsonify({'peers': peers_list})
     else:
         return jsonify({'error': 'Info hash not found'})
-    
-# @bp.route('/get_peers', methods=['GET'])
-# def adjust_rarity_based_on_peers(self, peers_rarity_arrays):
-#         if not peers_rarity_arrays:
-#             return
-
-#         # Calculate the sum of all rarity arrays
-#         sum_rarity_array = [sum(rarity_array[index] for rarity_array in peers_rarity_arrays) for index in range(self.num_pieces)]
-
-#         # Normalize the sum to a scale of 1 to 10
-#         max_sum = max(sum_rarity_array)
-#         normalized_sum = [value / max_sum * 10 for value in sum_rarity_array]
-
-#         # Update the rarity of each piece in the tracker
-#         for index in range(self.num_pieces):
-#             self.piece_metrics[index]['rarity'] = normalized_sum[index]

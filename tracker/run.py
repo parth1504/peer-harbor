@@ -5,13 +5,16 @@ import time
 import requests
 from server import create_app
 from flask import Blueprint, request, jsonify
+from server.redisServer import RedisInstance
 
 app = create_app()
-rarity_arrays = {}
-
-peerset = set("temp")  # Assuming you have a set of peers
 
 
+peerset=["random_info_hash"]
+
+rarity_arrays = {
+    "random_info_hash": [[1,9,2,1,1]],
+}      
 
 UDP_IP = "127.0.0.1"
 UDP_PORT = 5005
@@ -43,20 +46,22 @@ def calculate_and_broadcast(info_hash):
     index_sums = [sum(array[index] for array in rarity_arrays[info_hash]) for index in range(len(rarity_arrays[info_hash][0]))]
     normalized_values = normalize_values(index_sums)
     data_to_broadcast = {"new rarity array": normalized_values }
-
+    print(index_sums)
     # Broadcast the calculated data using UDP
     broadcast_udp_message(info_hash, json.dumps(data_to_broadcast))
 
 def refresh_periodically():
     while True:
-        time.sleep(15)  # 15 minutes interval
+        print("refreshing periodically!!")
+        time.sleep(15)  
 
         for info_hash in peerset:
+            print(info_hash)
             calculate_and_broadcast(info_hash)
 
 # Start the refresh_periodically function in a separate thread
 refresh_thread = threading.Thread(target=refresh_periodically, daemon=True)
-#refresh_thread.start()
+refresh_thread.start()
 
 # Endpoint for peers to send their info_hash
 @app.route('/send_info_hash', methods=['POST'])
