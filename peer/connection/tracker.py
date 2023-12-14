@@ -15,17 +15,14 @@ class TrackerThread:
         
 
     def send_rarity_array_periodically(self):
-        while True:
-
-            #time.sleep(15)  # 15 minutes interval
-            try:
-                print("sent")
-                response= requests.post(f"{server_address}/send_info_hash", json={"info_hash":self.info_hash ,"rarity_array":self.rarity_array})
-                data = response.json()
-                new_array=data['new_rarity_array']
-                self.rarity_tracker.refresh(new_array)
-            except requests.RequestException as e:
-                print(f"Error sending info_hash to server: {e}")
+        try:
+            print("sent")
+            response= requests.post(f"{server_address}/send_info_hash", json={"info_hash":self.info_hash ,"rarity_array":self.rarity_array})
+            data = response.json()
+            new_array=data['new_rarity_array']
+            self.rarity_tracker.refresh(new_array)
+        except requests.RequestException as e:
+            print(f"Error sending info_hash to server: {e}")
 
 
 

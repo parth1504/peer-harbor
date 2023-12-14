@@ -25,8 +25,10 @@ class RarityTracker:
             return None
 
     def refresh(self, global_rarity_values):
-        for index in range(self.num_pieces):
-            if index < len(global_rarity_values):
-                self.piece_metrics[index]['rarity'] = global_rarity_values[index]
-            else:
-                self.piece_metrics[index]['rarity'] = 5
+        print("Rarity tracker before refresh: ", self.piece_metrics)
+        print("Global Rarity Values before refresh: ", global_rarity_values)
+        
+        for key in global_rarity_values:
+            self.piece_metrics[key] = global_rarity_values[key]
+            
+            

@@ -65,7 +65,7 @@ class SeederHandler:
         sorted_indices = self.sort_indices_by_rarity(self.rarity_tracker)
         bit_array = self.receive_bit_array(self.client_socket)
         for index in sorted_indices:
-            if bit_array[index] == 1: 
+            if bit_array[index] == 1 and self.bit_array.bit_array[index] == 0: 
                 continue
 
             piece_data = self.piecify.read_piece(index)

@@ -25,7 +25,7 @@ class Leech:
         self.rarity_tracker = rarity_tracker
         self.torrent = torrent_reader
         self.announce_url = announce_url
-        self.info_hash = "random_info_hash" #torrent_reader.calculate_info_hash()
+        self.info_hash = torrent_reader.calculate_info_hash()
         self.is_running = True 
         self.bit_array=bit_array
         self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
@@ -53,8 +53,8 @@ class Leech:
         self.executor.shutdown(wait=True)
 
 
-download_file_path = "./upload/new.pdf"
-saved_torrent_path = "./upload/new.torrent"
+download_file_path = "./new.pdf"
+saved_torrent_path = "./new.torrent"
 
 torrent = TorrentReader(saved_torrent_path)
 piecify = Piecify(download_file_path, torrent.calculate_piece_length(), torrent.calculate_total_pieces())
