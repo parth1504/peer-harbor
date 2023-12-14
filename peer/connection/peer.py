@@ -1,12 +1,15 @@
+import sys,os
+import time
+
 current_file_path = os.path.abspath(__file__)
 project_root = os.path.dirname(os.path.dirname(current_file_path))
 sys.path.append(project_root)
 
 import socket
-import sys,os
 import threading
 from utils.Port import find_free_port
 from strategies.chokingAlgorithm import SeederHandler
+from connection.tracker import TrackerThread
 
 class SeedConnection:
     def __init__(self, peer_ip, peer_port, piecify, bit_array, rarity_tracker):
@@ -17,6 +20,7 @@ class SeedConnection:
         self.rarity_tracker = rarity_tracker
         self.connection_close = False
         self.thread = threading.Thread(target=self.startup_seed_connection_thread)
+        self.Tracker_thread= TrackerThread(rarity_tracker)
         
     def add_socket_to_queue(self, seed_transfer_port):
         seeder_transfer_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -26,12 +30,22 @@ class SeedConnection:
         SeederHandler(leecher_transfer_socket, self.piecify, self.bit_array, self.rarity_tracker , server_socket=seeder_transfer_socket)
         
     def startup_seed_connection_thread(self):
+        interval_duration = 300  # 5 minutes in seconds
+        last_call_time = time.time()
+
         while not self.connection_close:
             leecher_communication_socket, _ = self.seeder_communication_socket.accept()
             seed_transfer_port = find_free_port()
             leecher_communication_socket.send(str(seed_transfer_port).encode())
+            self.Tracker_thread.send_rarity_array_periodically()    #make it so that it is called after 5 minutes
             self.add_socket_to_queue(seed_transfer_port)
             leecher_communication_socket.close()
+            current_time = time.time()
+
+            # Check if 5 minutes have passed since the last call
+            if current_time - last_call_time >= interval_duration:
+                self.Tracker_thread.send_rarity_array_periodically()
+                last_call_time = current_time
 
     def startup_seed_connection(self):
         self.seeder_communication_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

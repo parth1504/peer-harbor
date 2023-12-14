@@ -22,30 +22,22 @@ def announce():
     info_hash = request.args.get('info_hash')
     ip = request.args.get('ip')
     port = int(request.args.get('port'))
-    # uploaded = int(request.args.get('uploaded'))
-    # downloaded = int(request.args.get('downloaded'))
-    # left = int(request.args.get('left'))
-    # compact = int(request.args.get('compact', 0))
-
     peer_id=str(ip)+''+ str(port)
+
     # Create a new torrent entry if it doesn't exist
     if not redis_client.key_exists(info_hash):
         print("info_hash not found in Redis.")
     
     peers = redis_client.get_peers(info_hash)
-    #print("out")
-    #print(peers)
 
     # Update the peer information or add a new peer
     peer_data = {
         'peer_id':peer_id,
         'ip': ip,
         'port': port,
-        # 'uploaded': uploaded,
-        # 'downloaded': downloaded,
-        # 'left': left,
         'last_announce': time.time(),
     }
+
     # Check if the peer already exists in the list
     if peers==None:
         peers=[]
@@ -60,7 +52,6 @@ def announce():
         peers.append(frozenset(peer_data.items()))
         redis_client.add_peer(info_hash,peer_data)
     
-    #print("gay")
     peers_list = [dict(peer_set) for peer_set in peers]
 
 
@@ -68,21 +59,6 @@ def announce():
     selected_peers = random.sample(peers, min(10, len(peers)))
     print(selected_peers)
 
-    # # Compact mode response
-    # if compact:
-    #     compact_peers = []
-    #     for peer in selected_peers:
-    #         compact_peers.append(peer['ip'].encode() + peer['port'].to_bytes(2, 'big'))
-    #     return jsonify({'peers': b''.join(compact_peers)})
-
-    # Full response
-    # peer_list = []
-    # for peer in selected_peers:
-    #     peer_list.append({
-    #         'ip': peer['ip'],
-    #         'port': peer['port'],
-    #     })
-    # print("here")
     return jsonify({'peers': peers_list})
 
 @bp.route('/scrape', methods=['GET'])

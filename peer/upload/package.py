@@ -22,6 +22,7 @@ class TorrentPackage:
         torrentReader = TorrentReader(output_torrent_path)
         self.info_hash = torrentReader.calculate_info_hash() 
         self.upload_torrent_to_server()
+        self.announce_to_tracker()
 
     def upload_torrent_to_server(self):
         with open(self.output_torrent_path, 'rb') as file:
@@ -45,6 +46,7 @@ class TorrentPackage:
             print(f"Error details: {response.text}")
 
     def announce_to_tracker(self):
+        print("in announce")
         params = {
             'info_hash': self.info_hash,
             'ip': self.peer_ip,
