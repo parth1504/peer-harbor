@@ -25,7 +25,7 @@ class Leech:
         self.rarity_tracker = rarity_tracker
         self.torrent = torrent_reader
         self.announce_url = announce_url
-        self.info_hash = torrent_reader.calculate_info_hash()
+        self.info_hash = "random_info_hash" #torrent_reader.calculate_info_hash()
         self.is_running = True 
         self.bit_array=bit_array
         self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
@@ -36,11 +36,14 @@ class Leech:
         while self.is_running:
             lock = Lock()
             peers = self.selector.get_info_from_tracker()
+            # print("infohash: ", self.info_hash)
+            # print("peerlist: ",peers)
 
             for peer in peers:
                 self.executor.submit(self.start_leeching, peer['ip'], peer['port'], lock)
 
     def start_leeching(self, peer_ip, peer_port,lock):
+        # print("leeching from: ", peer_ip, " ", peer_port)
         peer_instance = LeechConnection(peer_ip, peer_port)
         peer_instance.startup_leech_connection()
         LeecherHandler(peer_instance.leecher_transfer_socket, self.piecify, self.bit_array, self.rarity_tracker, lock)
@@ -58,6 +61,6 @@ piecify = Piecify(download_file_path, torrent.calculate_piece_length(), torrent.
 bit_array = BitArray( piecify.generate_piece_map(), download_file_path, saved_torrent_path)
 
 if not bit_array.is_bit_array_complete():
-    file_rarity = RarityTracker(len(piecify.generate_piece_map()))  
+    file_rarity = RarityTracker(len(piecify.generate_piece_map()),torrent.info_hash) 
     test = Leech(piecify, bit_array, file_rarity, torrent, torrent.get_announce_url())
     test.setup_leeching()

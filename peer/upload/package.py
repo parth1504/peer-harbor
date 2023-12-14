@@ -46,6 +46,7 @@ class TorrentPackage:
             print(f"Error details: {response.text}")
 
     def announce_to_tracker(self):
+        print("in announce")
         params = {
             'info_hash': self.info_hash,
             'ip': self.peer_ip,

@@ -1,8 +1,10 @@
 class RarityTracker:
-    def __init__(self, num_pieces, base_smoothing_factor=0.2):
+    def __init__(self, num_pieces,info_hash, base_smoothing_factor=0.2):
         self.num_pieces = num_pieces
+        self.info_hash= info_hash
         self.base_smoothing_factor = base_smoothing_factor
         self.piece_metrics = {index: {'rarity': 5, 'base_smoothing_factor': base_smoothing_factor} for index in range(num_pieces)}
+        
 
     def add_piece(self, piece_index):
         if piece_index not in self.piece_metrics:

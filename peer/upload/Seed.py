@@ -34,6 +34,7 @@ class Seed:
     def stop_seeding (self):
         self.peerInstance.close_seed_connection()
 
+
 if __name__ == "__main__":
     seeder_ip = input("Enter seeder IP: ")
     seeder_port = int(input("Enter seeder port: "))    
@@ -50,10 +51,11 @@ if __name__ == "__main__":
         announce_url = input("Enter announce URL: ")
         server_url = input("Enter server URL: ")
         torrent_package = TorrentPackage(file_path, output_torrent_path, name, keywords, created_by, announce_url, server_url, seeder_ip, seeder_port)
+        torrentReader = TorrentReader(output_torrent_path)
         piecify = Piecify(file_path)
         
     bit_array = BitArray(piecify.piece_map, file_path, output_torrent_path)
-    rarity_tracker = RarityTracker(piecify.total_pieces)
+    rarity_tracker = RarityTracker(piecify.total_pieces, torrentReader.calculate_info_hash())
     seed_instance = Seed(seeder_ip, seeder_port, piecify, bit_array, rarity_tracker, output_torrent_path)
     
 
@@ -68,3 +70,4 @@ if __name__ == "__main__":
             break
         else:
             print("Invalid command. Try again.")
+
