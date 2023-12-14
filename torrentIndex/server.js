@@ -34,7 +34,7 @@ app.use("/torrent", torrentRoutes);
 
 
 // Connection to port
-const PORT = process.env.PORT || 6969;
+const PORT = process.env.PORT || 42069;
 app.listen(PORT, (err) => {
   if (err)
     throw err;

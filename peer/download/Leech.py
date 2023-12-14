@@ -1,10 +1,10 @@
+import os
+import sys
+import concurrent.futures
 current_file_path = os.path.abspath(__file__)
 project_root = os.path.dirname(os.path.dirname(current_file_path))
 sys.path.append(project_root)
 
-import os
-import sys
-import concurrent.futures
 from strategies.chokingAlgorithm import LeecherHandler
 from connection.peer import LeechConnection
 from utils.FileManipulation import Piecify, TorrentReader, BitArray
@@ -50,8 +50,8 @@ class Leech:
         self.executor.shutdown(wait=True)
 
 
-download_file_path = "./upload/FH.pdf"
-saved_torrent_path = "./upload/Mahabharat.torrent"
+download_file_path = "./upload/new.pdf"
+saved_torrent_path = "./upload/new.torrent"
 
 torrent = TorrentReader(saved_torrent_path)
 piecify = Piecify(download_file_path, torrent.calculate_piece_length(), torrent.calculate_total_pieces())

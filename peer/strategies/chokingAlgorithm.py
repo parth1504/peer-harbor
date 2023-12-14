@@ -2,6 +2,7 @@ import threading
 import requests
 import struct
 from threading import Lock
+import random
 
 class PeerSelection:
     def __init__(self, announce_url, info_hash):
@@ -18,7 +19,11 @@ class PeerSelection:
         if response.status_code == 200:
             tracker_response = response.json()
             peers_info = tracker_response.get('peers', [])
-            peers_data = [{'ip': peer['ip'], 'port': peer['port']} for peer in peers_info]
+            
+            # Randomly choose 4 peers
+            selected_peers = random.sample(peers_info, min(4, len(peers_info)))
+            
+            peers_data = [{'ip': peer['ip'], 'port': peer['port']} for peer in selected_peers]
             return peers_data
         else:
             print(f"Error getting info from tracker. Status Code: {response.status_code}")

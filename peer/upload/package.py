@@ -22,6 +22,7 @@ class TorrentPackage:
         torrentReader = TorrentReader(output_torrent_path)
         self.info_hash = torrentReader.calculate_info_hash() 
         self.upload_torrent_to_server()
+        self.announce_to_tracker()
 
     def upload_torrent_to_server(self):
         with open(self.output_torrent_path, 'rb') as file:
@@ -55,10 +56,10 @@ class TorrentPackage:
 
 if __name__ == "__main__":
     # Set the announce URL for the tracker
-    announce_url = "http://your.tracker/announce"
+    announce_url = "http://127.0.0.1:6969/announce"
 
     # Set the server URL for uploading
-    server_url = "http://localhost:3000/upload"
+    server_url = "http://localhost:42069/torrent/upload"
 
     # Create an instance of the TorrentPackage class
     torrent_package = TorrentPackage(announce_url, server_url)

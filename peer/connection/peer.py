@@ -1,10 +1,11 @@
+import socket
+import sys,os
+import threading
+
 current_file_path = os.path.abspath(__file__)
 project_root = os.path.dirname(os.path.dirname(current_file_path))
 sys.path.append(project_root)
 
-import socket
-import sys,os
-import threading
 from utils.Port import find_free_port
 from strategies.chokingAlgorithm import SeederHandler
 

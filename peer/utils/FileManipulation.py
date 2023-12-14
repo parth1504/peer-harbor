@@ -18,7 +18,7 @@ class Piecify:
         self.file_path = file_path
         self.piece_size = piece_size if piece_size is not None else calculate_piece_length(os.path.getsize(self.file_path))
         self.total_pieces = total_pieces if total_pieces is not None else self.calculate_total_pieces() 
-        self.piece_map = {i: None for i in range(total_pieces)}
+        self.piece_map = {i: None for i in range(self.total_pieces)}
         self.lock = threading.Lock()
         self.generate_piece_map()
 
