@@ -110,10 +110,11 @@ class LeecherHandler:
         self.lock.acquire()
         self.send_bit_array(self.leecher_socket, self.bit_array.bit_array)
         index, piece = self.receive_piece(self.leecher_socket)
-        self.bit_array.set_bit(index)    
-        self.piecify.write_piece(index, piece)
-        self.rarity_tracker.add_piece(index)
-        self.lock.release()
+        if(index!=None):
+            self.bit_array.set_bit(index)    
+            self.piecify.write_piece(index, piece)
+            self.rarity_tracker.add_piece(index)
+            self.lock.release()
 
         if not self.already_seeded:
             SeederHandler(self.leecher_socket, self.piecify, self.bit_array, self.rarity_tracker, already_leeched=True)
@@ -132,6 +133,7 @@ class LeecherHandler:
         received_data = b''
         buffer_size = 4096
         index_value= None
+        piece_data=[]
         while True:
             data = socket.recv(buffer_size)
             
@@ -144,7 +146,9 @@ class LeecherHandler:
                 break
 
         received_data = received_data.replace(b'TERMINATE', b'')
-
+        if len(received_data) <= 8:
+            print(f"Received data size mismatch. Expected more bytes, but got {len(received_data)} bytes.")
+            return None, None
         while len(received_data) >= 8:
             header_format = '!Q'
             header_size = struct.calcsize(header_format)

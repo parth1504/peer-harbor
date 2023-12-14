@@ -61,7 +61,7 @@ def refresh_periodically():
 
 # Start the refresh_periodically function in a separate thread
 refresh_thread = threading.Thread(target=refresh_periodically, daemon=True)
-refresh_thread.start()
+#refresh_thread.start()
 
 # Endpoint for peers to send their info_hash
 @app.route('/send_info_hash', methods=['POST'])

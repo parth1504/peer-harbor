@@ -22,10 +22,10 @@ def announce():
     info_hash = request.args.get('info_hash')
     ip = request.args.get('ip')
     port = int(request.args.get('port'))
-    uploaded = int(request.args.get('uploaded'))
-    downloaded = int(request.args.get('downloaded'))
-    left = int(request.args.get('left'))
-    compact = int(request.args.get('compact', 0))
+    # uploaded = int(request.args.get('uploaded'))
+    # downloaded = int(request.args.get('downloaded'))
+    # left = int(request.args.get('left'))
+    # compact = int(request.args.get('compact', 0))
 
     peer_id=str(ip)+''+ str(port)
     # Create a new torrent entry if it doesn't exist
@@ -41,9 +41,9 @@ def announce():
         'peer_id':peer_id,
         'ip': ip,
         'port': port,
-        'uploaded': uploaded,
-        'downloaded': downloaded,
-        'left': left,
+        # 'uploaded': uploaded,
+        # 'downloaded': downloaded,
+        # 'left': left,
         'last_announce': time.time(),
     }
     # Check if the peer already exists in the list

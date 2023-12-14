@@ -142,13 +142,14 @@ class TorrentReader:
             return piece_length
         
     def get_announce_url(self):
-        with open(self.torrent_file_path, 'rb') as torrent_file:
-            torrent_data = bencodepy.decode(torrent_file.read())
-        announce_list = torrent_data.get('announce-list', [])
-        if not announce_list:
-            announce_list = [torrent_data.get('announce')]
+        return "http://127.0.0.1:6969/get_peers"
+        # with open(self.torrent_file_path, 'rb') as torrent_file:
+        #     torrent_data = bencodepy.decode(torrent_file.read())
+        # announce_list = torrent_data.get('announce-list', [])
+        # if not announce_list:
+        #     announce_list = [torrent_data.get('announce')]
 
-        return announce_list
+        # return announce_list
         
 def calculate_piece_length(file_size):
     return max(16384, 1 << int(math.log2(1 if file_size < 1024 else file_size / 1024) + 0.5))
