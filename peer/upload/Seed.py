@@ -8,6 +8,7 @@ sys.path.append(project_root)
 from connection.peer import SeedConnection
 from Package import TorrentPackage
 from utils.FileManipulation import Piecify, TorrentReader, BitArray
+from utils.Port import get_local_ip, find_free_port
 from strategies.pieceSelectionAlgorithm import RarityTracker
 
 '''
@@ -36,8 +37,8 @@ class Seed:
 
 
 if __name__ == "__main__":
-    seeder_ip = input("Enter seeder IP: ")
-    seeder_port = int(input("Enter seeder port: "))    
+    seeder_ip = get_local_ip()
+    seeder_port = find_free_port()    
     output_torrent_path = input("Enter output torrent path: ")
     file_path = input("Enter file path: ")
     

@@ -36,14 +36,11 @@ class Leech:
         while self.is_running:
             lock = Lock()
             peers = self.selector.get_info_from_tracker()
-            # print("infohash: ", self.info_hash)
-            # print("peerlist: ",peers)
 
             for peer in peers:
                 self.executor.submit(self.start_leeching, peer['ip'], peer['port'], lock)
 
     def start_leeching(self, peer_ip, peer_port,lock):
-        # print("leeching from: ", peer_ip, " ", peer_port)
         peer_instance = LeechConnection(peer_ip, peer_port)
         peer_instance.startup_leech_connection()
         LeecherHandler(peer_instance.leecher_transfer_socket, self.piecify, self.bit_array, self.rarity_tracker, lock)
@@ -52,15 +49,15 @@ class Leech:
         self.is_running = False
         self.executor.shutdown(wait=True)
 
+if __name__ == "__main__":
+    download_file_path = str(input("Enter path to save file in: "))
+    saved_torrent_path = str(input("Enter path to downloaded torrent file: "))
 
-download_file_path = "./new.pdf"
-saved_torrent_path = "./new.torrent"
+    torrent = TorrentReader(saved_torrent_path)
+    piecify = Piecify(download_file_path, torrent.calculate_piece_length(), torrent.calculate_total_pieces())
+    bit_array = BitArray( piecify.generate_piece_map(), download_file_path, saved_torrent_path)
 
-torrent = TorrentReader(saved_torrent_path)
-piecify = Piecify(download_file_path, torrent.calculate_piece_length(), torrent.calculate_total_pieces())
-bit_array = BitArray( piecify.generate_piece_map(), download_file_path, saved_torrent_path)
-
-if not bit_array.is_bit_array_complete():
-    file_rarity = RarityTracker(len(piecify.generate_piece_map()),torrent.info_hash) 
-    test = Leech(piecify, bit_array, file_rarity, torrent, torrent.get_announce_url())
-    test.setup_leeching()
+    if not bit_array.is_bit_array_complete():
+        file_rarity = RarityTracker(len(piecify.generate_piece_map()),torrent.info_hash) 
+        test = Leech(piecify, bit_array, file_rarity, torrent, torrent.get_announce_url())
+        test.setup_leeching()
